@@ -64,11 +64,5 @@ Contoh:
 ```env
 VITE_API_BASE_URL=https://api.inventaris-umkm.my.id
 
-## Tech Stack 
-- React + Vite 
-- Tailwind CSS 
-- shadcn/ui 
-- React Router 
-- Axios
 
 
