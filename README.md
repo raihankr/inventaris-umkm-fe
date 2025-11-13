@@ -1,18 +1,74 @@
-# React + Vite
+# 🧾 Inventaris UMKM — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplikasi inventaris untuk membantu pelaku UMKM dalam melakukan pencatatan dan pemantauan stok barang.  
+Dibuat menggunakan React + Vite dengan dukungan Tailwind CSS dan shadcn/ui.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📂 Struktur Folder
 
-## React Compiler
+### `src/`
+Tempat semua **source code utama**.  
+Semua yang akan dikompilasi dan ditampilkan di browser berada di sini.  
+Di dalamnya kamu membuat **komponen, halaman, styling, routing**, dan sebagainya.
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+---
 
-Note: This will impact Vite dev & build performances.
+### `assets/`
+Menyimpan **file statis** seperti gambar, logo, ikon, font, atau video.  
+Contoh: `react.svg`, `vite.svg`, atau `logo-umkm.png`.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### `components/`
+Berisi **potongan UI kecil (reusable components)** yang bisa digunakan berulang.  
+Contoh: `Button.jsx`, `Card.jsx`, `Modal.jsx`, dll.
+
+---
+
+### `pages/`
+Berisi **halaman besar** yang mewakili satu URL/route tertentu.  
+Contoh:
+- `/dashboard` → `Dashboard.jsx`
+- `/barang` → `Barang.jsx`
+- `/laporan` → `Laporan.jsx`
+
+---
+
+### `layouts/`
+Berisi **struktur tampilan utama** yang membungkus semua halaman.  
+Biasanya terdiri dari Sidebar, Navbar, dan konten halaman.  
+Contoh: `MainLayout.jsx`.
+
+---
+
+### `routes/`
+Berisi konfigurasi **rute (routing)** antar halaman.  
+Menghubungkan URL ke komponen halaman.  
+Contoh: `/barang` → `BarangPage`.
+
+---
+
+### `lib/`
+Berisi **fungsi bantu (helper)**, konfigurasi, atau logika kecil.  
+Misalnya:
+- Konfigurasi `axios` untuk API.
+- Fungsi `formatDate()`.
+- Fungsi validasi sederhana.
+
+---
+
+### `.env` / `.env.example`
+Berisi **konfigurasi rahasia** atau yang berbeda antar environment (development, staging, production).  
+Contoh:
+```env
+VITE_API_BASE_URL=https://api.inventaris-umkm.my.id
+
+## Tech Stack 
+- React + Vite 
+- Tailwind CSS 
+- shadcn/ui 
+- React Router 
+- Axios
+
+
