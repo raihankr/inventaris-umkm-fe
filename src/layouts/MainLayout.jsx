@@ -1,10 +1,15 @@
 export default function MainLayout({ children }) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-gray-800 text-white p-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <header className="bg-white shadow p-4">
         <h1 className="font-semibold text-lg">Inventaris UMKM</h1>
       </header>
-      <main className="flex-1 p-6 bg-gray-50">{children}</main>
+    
+      <main className="flex-1">{children}</main>
+
+      <footer className="bg-gray-100 text-center p-2 text-sm text-gray-600">
+        © 2025 Inventaris UMKM
+      </footer>
     </div>
   );
 }
