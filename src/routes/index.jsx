@@ -10,6 +10,7 @@ import Stok from "@/pages/Stok/Stok";
 import Transaksi from "@/pages/Transaksi/Transaksi";
 import Settings from "@/pages/Settings/Settings";
 import Profile from "@/pages/Profile/Profile";
+import Login from "@/pages/Login/login"
 
 export default function AppRoutes() {
   return (
@@ -31,6 +32,7 @@ export default function AppRoutes() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
+        <Route path="/login" element={<Login />} />
       </Routes>
     </Router>
   );
