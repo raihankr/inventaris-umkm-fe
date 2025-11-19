@@ -10,19 +10,24 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Home, User, Settings } from "lucide-react";
+import { User, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/reusable/button";
 import ProjectLogo from "@/assets/image/hugeicons--note-edit.svg";
+import DashboardLogo from "@/components/ui/icons/tabler--align-box-bottom-center.svg";
+import StokLogo from "@/components/ui/icons/fluent-mdl2--product-catalog.svg";
+import TransaksiLogo from "@/components/ui/icons/solar--hand-money-broken.svg";
 
 export default function AppSidebar() {
   const { open } = useSidebar(); // status sidebar (buka/tutup)
 
   // Daftar menu sidebar
   const menuItems = [
-    { icon: Home, label: "Dashboard", href: "/" },
-    { icon: User, label: "Profile", href: "/profile" },
+    { icon: DashboardLogo, label: "Dashboard", href: "/dashboard" },
+    { icon: StokLogo, label: "Transaksi", href: "/transaksi" },
+    { icon: TransaksiLogo, label: "Stok Barang", href: "/stok" },
     { icon: Settings, label: "Settings", href: "/settings" },
+    
   ];
 
   // Data user untuk footer
@@ -66,7 +71,15 @@ export default function AppSidebar() {
                       to={item.href}
                       className="flex items-center gap-2 rounded-md px-4 py-2 hover:bg-muted"
                     >
-                      <item.icon size={18} />
+                      {typeof item.icon === "string" ? (
+                        <img
+                          src={item.icon}
+                          alt={item.label}
+                          className="h-4 w-4 object-contain"
+                        />
+                      ) : (
+                        <item.icon size={18} />
+                      )}
                       <span>{item.label}</span>
                     </Link>
                   </SidebarMenuButton>

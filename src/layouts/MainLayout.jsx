@@ -1,21 +1,22 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "@/layouts/Sidebar";
 import Header from "@/layouts/Header";
+import { Outlet } from "react-router-dom";
 
-// Layout utama aplikasi
-export default function MainLayout({ children }) {
+export default function MainLayout() {
   return (
-    // Membungkus layout dengan SidebarProvider supaya sidebar bisa diakses di seluruh layout
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
-        <AppSidebar /> {/* Sidebar di sisi kiri */}
+        {/* Sidebar */}
+        <AppSidebar />
 
-        {/* Kolom kanan: header di atas, konten di bawah */}
-        <div className="flex-1 flex flex-col">
-          <Header /> {/* Bagian atas layout */}
-          
+        {/* Right section */}
+        <div className="flex flex-col flex-1">
+          <Header />
+
           <main className="flex-1 overflow-y-auto p-6">
-            {children} {/* Halaman/konten utama */}
+            {/* INI TEMPAT KONTEN ROUTE muncul */}
+            <Outlet />
           </main>
         </div>
       </div>
