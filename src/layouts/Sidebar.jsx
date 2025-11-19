@@ -90,23 +90,35 @@ export default function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer: info user (nama & email hilang saat collapse) */}
+      {/* Footer: info user (button profil)*/}
       <SidebarFooter className="p-0 border-t">
-        <div className="flex items-center gap-2 px-4 py-2 hover:bg-muted rounded-md cursor-pointer">
-          <img
-            src={user.avatar}
-            alt={user.name}
-            className="h-8 w-8 rounded-full object-cover"
-          />
-          <div
-            className={`flex flex-col text-sm transition-all duration-300 ${
-              open ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"
-            }`}
-          >
-            <span className="font-medium">{user.name}</span>
-            <span className="text-xs text-muted-foreground">{user.email}</span>
+        <Link
+          to="/profile"
+          className="block w-full"
+          title={open ? undefined : `${user.name} — ${user.email}`}
+          aria-label={`${user.name} — ${user.email}`}
+        >
+          <div className="flex items-center gap-2 px-4 py-2 hover:bg-muted rounded-md cursor-pointer">
+            <div className="relative h-8 w-8 flex-shrink-0">
+              <img // nanti ini diubah pakai avatar user dari backend
+                src={user.avatar}
+                alt={user.name}
+                className="h-8 w-8 rounded-full object-cover"
+              />
+              {/* dot status online/offline */}
+              <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-green-500 ring-2 ring-background" aria-hidden="true" />
+            </div>
+
+            <div
+              className={`flex flex-col text-sm transition-all duration-300 ${
+                open ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"
+              }`}
+            >
+              <span className="font-medium">{user.name}</span>
+              <span className="text-xs text-muted-foreground">{user.email}</span>
+            </div>
           </div>
-        </div>
+        </Link>
       </SidebarFooter>
     </Sidebar>
   );
