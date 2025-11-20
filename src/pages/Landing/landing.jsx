@@ -16,7 +16,7 @@ export default function Landing() {
       </p>
 
       {/* CTA Button */}
-      <Link to="/dashboard">
+      <Link to="/login">
         <Button className="mt-6 px-6 py-2 text-base">
           Login
         </Button>

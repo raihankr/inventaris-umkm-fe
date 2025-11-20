@@ -42,7 +42,7 @@ export default function AppSidebar() {
       {/* Header: logo + nama proyek (teks hilang saat collapse) */}
       <SidebarHeader className="px-0 py-2 h-12">
         <div className="w-full px-4 flex items-center">
-          <Link to="/" className="flex items-center gap-3">
+          <Link to="/dashboard" className="flex items-center gap-3">
             <img
               src={ProjectLogo}
               alt="Invertaris UMKM"
