@@ -1,3 +1,4 @@
+// Header.jsx
 import { useSidebar } from "@/components/ui/sidebar"; 
 import { Button } from "@/components/reusable/button"; 
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react"; 
@@ -15,27 +16,31 @@ import {
 import { formatBreadcrumb } from "@/lib/breadcrumb";
 
 export default function Header() {
+  // Ambil status sidebar dan fungsi toggle dari context
   const { open, toggleSidebar } = useSidebar();
+  
+  // Ambil URL saat ini untuk generate breadcrumb
   const location = useLocation();
-
-  // list path dari URL -> ["profile", "editprofile"]
   const pathnames = location.pathname.split("/").filter((p) => p);
 
   return (
     <header className="flex items-center justify-between border-b bg-background px-4 py-2">
       
-      {/* Toggle + Breadcrumb */}
+      {/* Toggle sidebar dan breadcrumb */}
       <div className="flex items-center gap-3">
 
+        {/* Tombol toggle sidebar */}
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
           className="hover:bg-muted p-0 h-8 w-8 flex items-center justify-center"
         >
+          {/* Ganti ikon sesuai status sidebar */}
           {open ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
         </Button>
 
+        {/* Breadcrumb navigasi */}
         <Breadcrumb>
           <BreadcrumbList>
             {pathnames.map((name, idx) => {
@@ -45,17 +50,19 @@ export default function Header() {
               return (
                 <div key={routeTo} className="flex items-center">
 
-                  {/* Hilangkan separator di item pertama */}
+                  {/* Separator antar item, kecuali item pertama */}
                   {idx !== 0 && <BreadcrumbSeparator />}
 
                   {isLast ? (
                     <BreadcrumbItem>
+                      {/* Teks breadcrumb untuk halaman terakhir */}
                       <BreadcrumbPage className="capitalize">
                         {formatBreadcrumb(name)}
                       </BreadcrumbPage>
                     </BreadcrumbItem>
                   ) : (
                     <BreadcrumbItem>
+                      {/* Link breadcrumb untuk navigasi */}
                       <BreadcrumbLink asChild>
                         <Link to={routeTo} className="capitalize">
                           {formatBreadcrumb(name)}
@@ -70,6 +77,7 @@ export default function Header() {
         </Breadcrumb>
       </div>
 
+      {/* Versi aplikasi */}
       <div className="text-xs text-muted-foreground">v1.0</div>
     </header>
   );
