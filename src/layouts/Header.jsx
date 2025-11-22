@@ -45,7 +45,7 @@ export default function Header() {
 
               return (
                 <div key={routeTo} className="flex items-center">
-                  {/* <BreadcrumbSeparator /> */}
+                  <BreadcrumbSeparator />
                   {isLast ? (
                     <BreadcrumbItem>
                       <BreadcrumbPage className="capitalize">

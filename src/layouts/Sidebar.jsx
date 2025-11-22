@@ -11,6 +11,14 @@ import {
   SidebarMenuAction,
   useSidebar,
 } from "@/components/ui/sidebar";
+
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+
+import { MoreVertical } from "lucide-react";
 import { User, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import { NavLink } from "react-router-dom";
@@ -41,7 +49,7 @@ export default function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      {/* Header: logo + nama proyek (teks hilang saat collapse) */}
+      {/* Header: logo + nama proyek (teks-nya akan hilang saat collapse) */}
       <SidebarHeader className="px-0 py-2 h-12 border-b ">
         <div className="w-full px-4 flex items-center">
           <Link to="/dashboard" className="flex items-center gap-3">
@@ -79,7 +87,7 @@ export default function AppSidebar() {
                             <img
                               src={item.icon}
                               alt={item.label}
-                              className="h-5 w-5 object-contain"/>
+                              className="h-5 w-5 object-contain" />
                           ) : (
                             <item.icon size={20} />
                           )}
@@ -97,33 +105,93 @@ export default function AppSidebar() {
 
       {/* Footer: info user (button profil)*/}
       <SidebarFooter className="p-0 border-t">
-        <Link
-          to="/profile"
-          className="block w-full"
-          title={open ? undefined : `${user.name} — ${user.email}`}
-          aria-label={`${user.name} — ${user.email}`}
-        >
-          <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted rounded-md cursor-pointer">
-            <div className="relative h-10 w-10 flex-shrink-0">
-              <img // nanti ini diubah pakai avatar user dari backend
-                src={user.avatar}
-                alt={user.name}
-                className="h-10 w-10 rounded-full object-cover"
-              />
-              {/* dot status online/offline */}
-              <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-green-500 ring-2 ring-background" aria-hidden="true" />
-            </div>
+        <div className="flex items-center justify-between px-4 py-3 hover:bg-muted rounded-md">
 
-            <div
-              className={`flex flex-col transition-all duration-300 ${open ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"
-                }`}
-            >
-              <span className="font-medium text-base">{user.name}</span>
-              <span className="text-sm text-muted-foreground">{user.email}</span>
-            </div>
-          </div>
-        </Link>
+          {/* 1. Popover PROFILE PREVIEW */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                className="flex items-center gap-3 flex-1 text-left"
+                title={open ? undefined : `${user.name} — ${user.email}`}
+              >
+                <div className="relative h-10 w-10 flex-shrink-0">
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="h-10 w-10 rounded-full object-cover"
+                  />
+                  <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-green-500 ring-2 ring-background" />
+                </div>
+
+                <div
+                  className={`flex flex-col transition-all duration-300 ${open ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"
+                    }`}
+                >
+                  <span className="font-medium text-base">{user.name}</span>
+                  <span className="text-sm text-muted-foreground">{user.email}</span>
+                </div>
+              </button>
+            </PopoverTrigger>
+
+            <PopoverContent className="w-56 p-4 ml-3">
+              <div className="flex flex-col items-center gap-3">
+                <img
+                  src={user.avatar}
+                  className="w-16 h-16 rounded-full"
+                  alt={user.name}
+                />
+                <div className="text-center">
+                  <p className="font-semibold">{user.name}</p>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                </div>
+
+                <Link
+                  to="/profile"
+                  className="w-full mt-3 px-3 py-2 rounded-md bg-accent hover:bg-accent/80 text-sm text-center"
+                >
+                  View Profile
+                </Link>
+              </div>
+            </PopoverContent>
+
+          </Popover>
+
+          {/* 2. Popover ACTION MENU === */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                className="p-2 rounded-md hover:bg-accent flex-shrink-0"
+                aria-label="More options"
+              >
+                <MoreVertical size={20} />
+              </button>
+            </PopoverTrigger>
+
+            <PopoverContent className="w-40 p-2">
+              <div className="flex flex-col">
+                <Link
+                  to="profile/editprofile"
+                  className="px-3 py-2 rounded-md hover:bg-accent text-sm"
+                >
+                  Edit Profile
+                </Link>
+
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("token");
+                    window.location.href = "/login";
+                  }}
+                  className="px-3 py-2 rounded-md hover:bg-accent text-sm text-left text-red-600"
+                >
+                  Logout
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+        </div>
       </SidebarFooter>
+
     </Sidebar>
   );
 }
