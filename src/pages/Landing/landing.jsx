@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { Button } from "@/components/reusable/button"
+import { Button } from "@/components/ui/button"
 
 export default function Landing() {
   return (

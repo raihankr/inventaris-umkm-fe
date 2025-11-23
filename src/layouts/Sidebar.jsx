@@ -33,13 +33,13 @@ import { Link, NavLink } from "react-router-dom";
 
 import Profile from '@/pages/Profile/Profile.jsx';
 import EditProfile from '@/pages/Profile/EditProfile.jsx';
-import { Button } from "@/components/reusable/button";
+import { Button } from "@/components/ui/button";
 
-import ProjectLogo from "@/assets/image/academicons--open-data.svg";
-import DashboardLogo from "@/components/ui/icons/material-symbols--dashboard-outline-rounded.svg";
-import StokLogo from "@/components/ui/icons/game-icons--sell-card.svg";
-import TransaksiLogo from "@/components/ui/icons/fluent--money-16-filled.svg";
-import SettingsLogo from "@/components/ui/icons/material-symbols--settings.svg";
+import ProjectLogo from "@/assets/icons/academicons--open-data.svg";
+import DashboardLogo from "@/assets/icons/material-symbols--dashboard-outline-rounded.svg";
+import StokLogo from "@/assets/icons//game-icons--sell-card.svg";
+import TransaksiLogo from "@/assets/icons/fluent--money-16-filled.svg";
+import SettingsLogo from "@/assets/icons//material-symbols--settings.svg";
 
 export default function AppSidebar() {
   // Status sidebar dari context (open/close)

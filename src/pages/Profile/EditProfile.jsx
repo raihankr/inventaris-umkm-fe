@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/reusable/button";
+import { Button } from "@/components/ui/button";
 import { ValidateProfile } from "./ValidateProfile";
 
 export default function EditProfile({ user, onUpdate, onClose }) {
