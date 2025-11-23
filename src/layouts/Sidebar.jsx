@@ -58,6 +58,7 @@ export default function AppSidebar() {
 
   // State user (nama, email, avatar, role)
   const [user, setUser] = useState({
+    username: "johndoe69",
     name: "John Doe",
     email: "john@example.com",
     avatar: "https://ui.shadcn.com/avatars/01.png",
