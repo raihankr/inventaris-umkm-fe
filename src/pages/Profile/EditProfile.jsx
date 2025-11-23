@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Empty } from "@/components/ui/empty";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/reusable/button";
 
@@ -45,14 +44,10 @@ export default function EditProfile({ user, onUpdate, onClose }) {
     <div className="flex flex-col gap-4 mt-2">
       {/* Avatar */}
       <div className="flex flex-col items-center gap-2">
-        {avatarPreview ? (
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={avatarPreview} alt={name} />
-            <AvatarFallback>{name[0]}</AvatarFallback>
-          </Avatar>
-        ) : (
-          <Empty className="h-20 w-20 text-center">Please upload your photo</Empty>
-        )}
+        <Avatar className="h-20 w-20">
+          <AvatarImage src={avatarPreview || 'https://ui.shadcn.com/avatars/01.png'} alt={name} />
+          <AvatarFallback>{name[0]}</AvatarFallback>
+        </Avatar>
         <button
           className="px-3 py-1 rounded border hover:bg-gray-100"
           onClick={() => fileInputRef.current.click()}
@@ -71,25 +66,25 @@ export default function EditProfile({ user, onUpdate, onClose }) {
       {/* Name */}
       <div className="flex flex-col gap-1">
         <Label>Name</Label>
-        <Input value={name} onChange={(e) => setName(e.target.value)} />
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your full name" />
       </div>
 
       {/* Email */}
       <div className="flex flex-col gap-1">
         <Label>Email</Label>
-        <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" />
       </div>
 
       {/* Phone */}
       <div className="flex flex-col gap-1">
         <Label>Contact Number</Label>
-        <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. +62 812 3456 7890" />
       </div>
 
       {/* Address */}
       <div className="flex flex-col gap-1">
         <Label>Address</Label>
-        <Input value={address} onChange={(e) => setAddress(e.target.value)} />
+        <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter your address" />
       </div>
 
       {/* Buttons: Tutup left, Save right */}
