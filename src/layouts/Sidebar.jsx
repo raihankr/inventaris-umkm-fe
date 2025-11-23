@@ -44,7 +44,7 @@ import SettingsLogo from "@/components/ui/icons/material-symbols--settings.svg";
 export default function AppSidebar() {
   // Status sidebar dari context (open/close)
   const { open } = useSidebar();
-  
+
   // State untuk menampilkan dialog edit profile
   const [showEditProfile, setShowEditProfile] = useState(false);
 
@@ -58,6 +58,7 @@ export default function AppSidebar() {
 
   // State user (nama, email, avatar, role)
   const [user, setUser] = useState({
+    username: "johndoe69",
     name: "John Doe",
     email: "john@example.com",
     avatar: "https://ui.shadcn.com/avatars/01.png",
@@ -125,13 +126,13 @@ export default function AppSidebar() {
         {/* Footer: profile + logout */}
         <SidebarFooter className="p-0 border-t">
           <div className="flex items-center justify-between px-4 py-3 hover:bg-muted rounded-md">
-            
+
             {/* Popover profile */}
             <Popover>
               <PopoverTrigger asChild>
                 <button
                   className="flex items-center gap-3 flex-1 text-left"
-                  title={open ? undefined : `${user.name} — ${user.email}`}
+                  title={open ? undefined : `${user.name} — ${user.username}`}
                 >
                   <div className="relative h-10 w-10 flex-shrink-0">
                     <Avatar>
@@ -142,7 +143,7 @@ export default function AppSidebar() {
                   </div>
                   <div className={`flex flex-col transition-all duration-300 ${open ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"}`}>
                     <span className="font-medium text-base">{user.name}</span>
-                    <span className="text-sm text-muted-foreground">{user.email}</span>
+                    <span className="text-sm text-muted-foreground">@{user.username}</span>
                   </div>
                 </button>
               </PopoverTrigger>
@@ -189,7 +190,11 @@ export default function AppSidebar() {
 
       {/* Dialog edit profile */}
       <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent
+          className="sm:max-w-[425px]"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()} // biar tombol ESC tidak close
+        >
           <DialogHeader>
             <DialogTitle>Edit Profile</DialogTitle>
             <DialogDescription>
