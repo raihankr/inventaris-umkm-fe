@@ -44,7 +44,7 @@ import SettingsLogo from "@/components/ui/icons/material-symbols--settings.svg";
 export default function AppSidebar() {
   // Status sidebar dari context (open/close)
   const { open } = useSidebar();
-  
+
   // State untuk menampilkan dialog edit profile
   const [showEditProfile, setShowEditProfile] = useState(false);
 
@@ -125,7 +125,7 @@ export default function AppSidebar() {
         {/* Footer: profile + logout */}
         <SidebarFooter className="p-0 border-t">
           <div className="flex items-center justify-between px-4 py-3 hover:bg-muted rounded-md">
-            
+
             {/* Popover profile */}
             <Popover>
               <PopoverTrigger asChild>
@@ -189,7 +189,11 @@ export default function AppSidebar() {
 
       {/* Dialog edit profile */}
       <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent
+          className="sm:max-w-[425px]"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()} // biar tombol ESC tidak close
+        >
           <DialogHeader>
             <DialogTitle>Edit Profile</DialogTitle>
             <DialogDescription>
