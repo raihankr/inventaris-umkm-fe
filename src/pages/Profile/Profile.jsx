@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 export default function Profile({ user, onEdit }) {
   // Mengamankan akses properti yang mungkin tidak ada
   // Misalnya, kalo user.contact atau user.address tidak ada
-  const phone = user.phone || user.contact?.phone || ''; 
+  const phone = user.phone || user.contact?.phone || '';
   const address = user.address || user.contact?.address || '';
 
   return (
@@ -19,19 +19,16 @@ export default function Profile({ user, onEdit }) {
         </AvatarFallback>
       </Avatar>
 
-      {/* Nama */}
-      <div className="w-full px-2">
-        <p className="text-xl font-bold text-center">{user.name || '-'}</p>
+      {/* Nama dan Username*/}
+      <div className="w-full px-2 text-center">
+        <p className="text-xl font-bold">{user.name || '-'}</p>
+        <p className="text-sm font-semibold text-muted-foreground">{user.username || '-'}</p>
       </div>
 
-      {/* Username, Name, Email, Role, Contact, Address */}
+      {/* Email, Role, Contact, Address */}
       <div className="w-full px-2">
         <div className="bg-muted/20 rounded-md p-3">
           <div className="flex flex-col gap-2">
-            <div>
-              <p className="text-xs text-muted-foreground">Username</p>
-              <p className="text-sm font-semibold text-muted-foreground">{user.username || '-'}</p>
-            </div>
             <div>
               <p className="text-xs text-muted-foreground">Email</p>
               <p className="text-sm font-semibold text-muted-foreground">{user.email || '-'}</p>

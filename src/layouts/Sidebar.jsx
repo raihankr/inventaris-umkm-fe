@@ -132,7 +132,7 @@ export default function AppSidebar() {
               <PopoverTrigger asChild>
                 <button
                   className="flex items-center gap-3 flex-1 text-left"
-                  title={open ? undefined : `${user.name} — ${user.email}`}
+                  title={open ? undefined : `${user.name} — ${user.username}`}
                 >
                   <div className="relative h-10 w-10 flex-shrink-0">
                     <Avatar>
@@ -143,7 +143,7 @@ export default function AppSidebar() {
                   </div>
                   <div className={`flex flex-col transition-all duration-300 ${open ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"}`}>
                     <span className="font-medium text-base">{user.name}</span>
-                    <span className="text-sm text-muted-foreground">{user.email}</span>
+                    <span className="text-sm text-muted-foreground">@{user.username}</span>
                   </div>
                 </button>
               </PopoverTrigger>
