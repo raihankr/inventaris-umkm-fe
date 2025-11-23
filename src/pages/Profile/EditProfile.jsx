@@ -6,13 +6,17 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/reusable/button";
 
 export default function EditProfile({ user, onUpdate, onClose }) {
+  // State untuk menyimpan input user
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
+  const [phone, setPhone] = useState(user.contact?.phone || '');
+  const [address, setAddress] = useState(user.contact?.address || '');
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(user.avatar);
 
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef(null); // Untuk mengakses input file secara langsung
 
+  // Menghandle perubahan file avatar dan membuat preview
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -21,11 +25,17 @@ export default function EditProfile({ user, onUpdate, onClose }) {
     }
   };
 
+  // Menyimpan perubahan profil
   const handleSave = () => {
     const updatedUser = {
       ...user,
       name,
       email,
+      contact: {
+        ...user.contact,
+        phone,
+        address,
+      },
       avatar: avatarPreview,
     };
     if (onUpdate) onUpdate(updatedUser);
@@ -68,6 +78,18 @@ export default function EditProfile({ user, onUpdate, onClose }) {
       <div className="flex flex-col gap-1">
         <Label>Email</Label>
         <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+      </div>
+
+      {/* Phone */}
+      <div className="flex flex-col gap-1">
+        <Label>Contact Number</Label>
+        <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+      </div>
+
+      {/* Address */}
+      <div className="flex flex-col gap-1">
+        <Label>Address</Label>
+        <Input value={address} onChange={(e) => setAddress(e.target.value)} />
       </div>
 
       {/* Buttons: Tutup left, Save right */}
