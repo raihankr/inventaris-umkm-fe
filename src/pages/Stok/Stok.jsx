@@ -30,25 +30,10 @@ export default function StokUMKM() {
   };
 
   const getStatsData = () => {
-    const tersedia = stokBarang.filter(item => {
-      const status = getStatus(item.stok, item.minimal);
-      return status.label === 'Tersedia';
-    }).length;
-
-    const menipis = stokBarang.filter(item => {
-      const status = getStatus(item.stok, item.minimal);
-      return status.label === 'Stok Menipis';
-    }).length;
-
-    const hampirHabis = stokBarang.filter(item => {
-      const status = getStatus(item.stok, item.minimal);
-      return status.label === 'Hampir Habis';
-    }).length;
-
-    const habis = stokBarang.filter(item => {
-      const status = getStatus(item.stok, item.minimal);
-      return status.label === 'Habis';
-    }).length;
+    const tersedia = stokBarang.filter(item => getStatus(item.stok, item.minimal).label === 'Tersedia').length;
+    const menipis = stokBarang.filter(item => getStatus(item.stok, item.minimal).label === 'Stok Menipis').length;
+    const hampirHabis = stokBarang.filter(item => getStatus(item.stok, item.minimal).label === 'Hampir Habis').length;
+    const habis = stokBarang.filter(item => getStatus(item.stok, item.minimal).label === 'Habis').length;
 
     return { tersedia, menipis, hampirHabis, habis };
   };
@@ -96,66 +81,79 @@ export default function StokUMKM() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-3 sm:p-6">
+      {/* btn tambah barang buat di mobile */}
+      <button
+        onClick={() => {
+          setShowModal(true);
+          setEditingId(null);
+          setFormData({ nama: '', kategori: '', stok: '', harga: '', satuan: '', minimal: '' });
+        }}
+        className="sm:hidden fixed bottom-5 right-5 bg-gray-900 hover:bg-black text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-all"
+      >
+        <Plus size={28} />
+      </button>
+      
+
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-gray-800 to-black bg-clip-text text-transparent">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-gray-800 to-black bg-clip-text text-transparent">
             Manajemen Stok UMKM
           </h1>
           <p className="text-gray-600">Kelola inventaris produk UMKM Anda dengan mudah</p>
         </div>
 
-       
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl p-5 border-2 border-gray-200 shadow-sm hover:shadow-md transition-all">
+        
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-gray-200 shadow-sm transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm mb-1">Tersedia</p>
-                <p className="text-3xl font-bold text-gray-800">{stats.tersedia}</p>
+                <p className="text-gray-600 text-xs sm:text-sm mb-1">Tersedia</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-800">{stats.tersedia}</p>
               </div>
-              <Package className="text-gray-800" size={36} />
+              <Package className="text-gray-800" size={32} />
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border-2 border-gray-300 shadow-sm hover:shadow-md transition-all">
+          <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-gray-300 shadow-sm transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm mb-1">Stok Menipis</p>
-                <p className="text-3xl font-bold text-gray-700">{stats.menipis}</p>
+                <p className="text-gray-600 text-xs sm:text-sm mb-1">Stok Menipis</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-700">{stats.menipis}</p>
               </div>
-              <AlertTriangle className="text-gray-700" size={36} />
+              <AlertTriangle className="text-gray-700" size={32} />
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border-2 border-gray-400 shadow-sm hover:shadow-md transition-all">
+          <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-gray-400 shadow-sm transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm mb-1">Hampir Habis</p>
-                <p className="text-3xl font-bold text-gray-800">{stats.hampirHabis}</p>
+                <p className="text-gray-600 text-xs sm:text-sm mb-1">Hampir Habis</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-800">{stats.hampirHabis}</p>
               </div>
-              <AlertCircle className="text-gray-800" size={36} />
+              <AlertCircle className="text-gray-800" size={32} />
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border-2 border-gray-900 shadow-sm hover:shadow-md transition-all">
+          <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-gray-900 shadow-sm transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm mb-1">Habis</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.habis}</p>
+                <p className="text-gray-600 text-xs sm:text-sm mb-1">Habis</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.habis}</p>
               </div>
-              <XCircle className="text-gray-900" size={36} />
+              <XCircle className="text-gray-900" size={32} />
             </div>
           </div>
         </div>
 
-      
-        <div className="bg-gradient-to-r from-gray-800 to-black rounded-xl p-6 mb-6 text-white shadow-lg">
+
+        <div className="bg-gradient-to-r from-gray-800 to-black rounded-xl p-5 sm:p-6 mb-6 text-white shadow-lg">
           <p className="text-gray-300 text-sm mb-1">Total Nilai Inventaris</p>
-          <p className="text-3xl font-bold">{formatRupiah(totalNilai)}</p>
+          <p className="text-2xl sm:text-3xl font-bold">{formatRupiah(totalNilai)}</p>
         </div>
 
-       
+
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -164,24 +162,58 @@ export default function StokUMKM() {
               placeholder="Cari barang atau kategori..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border-2 border-gray-300 rounded-lg pl-12 pr-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-gray-800 transition-all"
+              className="w-full bg-white border-2 border-gray-300 rounded-lg pl-12 pr-4 py-2 md:py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-gray-800 transition-all"
             />
           </div>
+
           <button
             onClick={() => {
               setShowModal(true);
               setEditingId(null);
               setFormData({ nama: '', kategori: '', stok: '', harga: '', satuan: '', minimal: '' });
             }}
-            className="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg"
+            className="hidden sm:flex bg-gray-900 hover:bg-black text-white px-6 py-2 sm:py-3 rounded-lg font-semibold items-center gap-2 transition-all shadow-lg"
           >
             <Plus size={20} />
             Tambah Barang
           </button>
         </div>
 
-    
-        <div className="bg-white rounded-xl border-2 border-gray-300 overflow-hidden shadow-lg">
+
+        
+        <div className="block md:hidden space-y-4 px-2">
+          {filteredStok.map(item => {
+            const status = getStatus(item.stok, item.minimal);
+            const StatusIcon = status.icon;
+            return (
+              <div key={item.id} className="bg-white p-4 rounded-xl shadow border border-gray-200">
+                <div className="flex justify-between">
+                  <div>
+                    <p className="font-bold text-gray-800">{item.nama}</p>
+                    <p className="text-gray-500 text-sm">{item.kategori}</p>
+                  </div>
+                  <span className={`px-2 py-1 text-xs ${status.color} rounded-full flex items-center gap-1`}>
+                    <StatusIcon size={12}/> {status.label}
+                  </span>
+                </div>
+                
+                <div className="mt-3 text-sm">
+                  <p>Stok: <b>{item.stok}</b> {item.satuan}</p>
+                  <p>Harga: <b>{formatRupiah(item.harga)}</b></p>
+                </div>
+
+                <div className="flex gap-2 mt-4">
+                  <button onClick={() => handleEdit(item)} className="flex-1 bg-gray-900 text-white py-2 rounded-lg text-sm">Edit</button>
+                  <button onClick={() => handleDelete(item.id)} className="flex-1 bg-gray-700 text-white py-2 rounded-lg text-sm">Hapus</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+
+
+        <div className="bg-white rounded-xl border-2 border-gray-300 overflow-hidden shadow-lg hidden md:block">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gradient-to-r from-gray-800 to-black text-white">
@@ -242,10 +274,10 @@ export default function StokUMKM() {
           </div>
         </div>
 
-        
+
         {showModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl border-2 border-gray-300 p-6 w-full max-w-md shadow-2xl">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-6">
+            <div className="bg-white rounded-xl border-2 border-gray-300 p-6 w-full max-w-sm sm:max-w-md shadow-2xl">
               <h2 className="text-2xl font-bold mb-6 text-gray-800">{editingId ? 'Edit Barang' : 'Tambah Barang Baru'}</h2>
               <div className="space-y-4">
                 <div>
@@ -322,6 +354,8 @@ export default function StokUMKM() {
             </div>
           </div>
         )}
+
+
       </div>
     </div>
   );
