@@ -110,4 +110,20 @@ export async function fetchWithPagination(path, options = {}) {
   return apiGet(path, params)
 }
 
+// fetch logout
+export async function apiLogout(path) {
+  try {
+    const tempApi = axios.create({
+      baseURL: getBaseApiUrl(),
+      withCredentials: false,
+      headers: { Accept: "application/json" },
+    });
+
+    const res = await tempApi.get(path);
+    return formatSuccess(res);
+  } catch (err) {
+    return formatError(err);
+  }
+}
+
 export default api

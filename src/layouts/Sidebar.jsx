@@ -33,6 +33,7 @@ import { Link, NavLink } from "react-router-dom";
 
 import Profile from '@/pages/Profile/Profile.jsx';
 import EditProfile from '@/pages/Profile/EditProfile.jsx';
+import Logout from "@/pages/Login/logout.jsx";
 import { Button } from "@/components/ui/button";
 
 import ProjectLogo from "@/assets/icons/academicons--open-data.svg";
@@ -172,15 +173,11 @@ export default function AppSidebar() {
                   >
                     Edit Profile
                   </button>
-                  <button
-                    onClick={() => {
-                      localStorage.removeItem("token");
-                      window.location.href = "/login";
-                    }}
-                    className="px-3 py-2 rounded-md hover:bg-accent text-sm text-left text-red-600"
-                  >
-                    Logout
-                  </button>
+
+                  {/* Ganti tombol logout inline sebelumnya -> gunakan komponen Logout */}
+                  <div className="px-1">
+                    <Logout />
+                  </div>
                 </div>
               </PopoverContent>
             </Popover>
