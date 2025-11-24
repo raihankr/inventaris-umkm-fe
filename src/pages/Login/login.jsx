@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import {apiPost} from "../../lib/api.js";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -19,7 +20,6 @@ export default function LoginPage() {
     if (message) setShowPopup(true);
   }, [message]);
 
-  const baseUrl = import.meta.env.VITE_BASE_URL_API_DOMAIN;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,21 +27,13 @@ export default function LoginPage() {
     setErrorMessage(""); // reset error
 
     try {
-      const response = await fetch(`${baseUrl}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username, password }),
-      });
+      const response = await apiPost('/auth/login', { username, password });
 
-      if (!response.ok) {
+      if (response.status != 200) {
         setErrorMessage("Username atau Password salah.");
         setLoading(false);
         return;
       }
-
-      const data = await response.json();
-      localStorage.setItem("token", data.data.token);
 
       setShowPopup(false);
       window.history.replaceState({}, "");
