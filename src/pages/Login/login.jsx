@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); // ⬅️ tambahan
 
   const message = location.state?.message;
   const [showPopup, setShowPopup] = useState(false);
@@ -23,6 +24,7 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage(""); // reset error
 
     try {
       const response = await fetch(`${baseUrl}/auth/login`, {
@@ -32,13 +34,12 @@ export default function LoginPage() {
       });
 
       if (!response.ok) {
-        alert("Login gagal. Periksa username/password.");
+        setErrorMessage("Username atau Password salah.");
         setLoading(false);
         return;
       }
 
       const data = await response.json();
-
       localStorage.setItem("token", data.data.token);
 
       setShowPopup(false);
@@ -46,8 +47,8 @@ export default function LoginPage() {
 
       navigate("/dashboard");
     } catch (error) {
-      console.error("Error saat login:", error);
-      alert("Terjadi kesalahan. Coba beberapa saat lagi.");
+      console.error("Error:", error);
+      setErrorMessage("Terjadi kesalahan server. Coba lagi nanti.");
       setLoading(false);
     }
   };
@@ -79,12 +80,13 @@ export default function LoginPage() {
         </div>
       )}
 
-      {/* Form login - kiri */}
+      {/* Form login */}
       <div className="flex-1 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-md">
           <h1 className="text-3xl font-bold mb-6 text-black">Login</h1>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
+            
             <div>
               <label className="text-sm font-medium text-gray-800">
                 Username
@@ -123,6 +125,12 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {errorMessage && (
+              <p className="text-red-600 text-sm -mt-2">
+                {errorMessage}
+              </p>
+            )}
+
             <button
               type="submit"
               disabled={loading}
@@ -136,7 +144,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* kanan */}
+      {/* Right side */}
       <div
         className="hidden md:flex flex-1 items-center justify-center p-10"
         style={{ backgroundColor: "var(--foreground)" }}
