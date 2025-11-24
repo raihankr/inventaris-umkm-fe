@@ -1,3 +1,7 @@
-export default function settings() {
-  return <h2 className="text-xl font-bold">ini settings</h2>;
+export default function Settings() {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-sm text-muted-foreground">Pengaturan aplikasi akan ditaruh di sini.</p>
+    </div>
+  );
 }

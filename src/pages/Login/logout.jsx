@@ -63,7 +63,6 @@ export default function Logout() {
           Logout
         </button>
       </AlertDialogTrigger>
-
       <AlertDialogContent className="sm:max-w-[420px]">
         <AlertDialogHeader>
           <AlertDialogTitle>Keluar dari akun?</AlertDialogTitle>
@@ -82,7 +81,7 @@ export default function Logout() {
         )}
 
         <AlertDialogFooter className="mt-4">
-          <AlertDialogCancel 
+          <AlertDialogCancel
             onClick={handleCancel}
             disabled={loading}
           >

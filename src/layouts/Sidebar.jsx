@@ -1,4 +1,3 @@
-// AppSidebar.jsx
 import { useState } from "react";
 import {
   Sidebar,
@@ -34,6 +33,7 @@ import { Link, NavLink } from "react-router-dom";
 import Profile from '@/pages/Profile/Profile.jsx';
 import EditProfile from '@/pages/Profile/EditProfile.jsx';
 import Logout from "@/pages/Login/logout.jsx";
+import Settings from "@/pages/Settings/Settings";
 import { Button } from "@/components/ui/button";
 
 import ProjectLogo from "@/assets/icons/academicons--open-data.svg";
@@ -43,18 +43,16 @@ import TransaksiLogo from "@/assets/icons/fluent--money-16-filled.svg";
 import SettingsLogo from "@/assets/icons//material-symbols--settings.svg";
 
 export default function AppSidebar() {
-  // Status sidebar dari context (open/close)
-  const { open } = useSidebar();
+  const { open } = useSidebar(); // open close status sidebar
+  const [showEditProfile, setShowEditProfile] = useState(false); // dialog edit profile
+  const [showSettings, setShowSettings] = useState(false); // dialog settings
 
-  // State untuk menampilkan dialog edit profile
-  const [showEditProfile, setShowEditProfile] = useState(false);
 
   // Daftar menu sidebar
   const menuItems = [
     { icon: DashboardLogo, label: "Dashboard", href: "/dashboard" },
     { icon: TransaksiLogo, label: "Transaksi", href: "/transaksi" },
     { icon: StokLogo, label: "Stok Barang", href: "/stok" },
-    { icon: SettingsLogo, label: "Settings", href: "/settings" },
   ];
 
   // State user (nama, email, avatar, role)
@@ -167,14 +165,31 @@ export default function AppSidebar() {
                     </button>
                   </PopoverTrigger>
                   <PopoverContent className="w-40 p-2">
-                    <div className="flex flex-col">
+                    <div className="flex flex-col space-y-1">
+
+                      {/* Edit Profile */}
                       <button
-                        className="px-3 py-2 rounded-md hover:bg-accent text-sm text-left"
-                        onClick={() => setShowEditProfile(true)}
-                      >
+                        className="px-3 py-2 rounded-md hover:bg-accent text-sm text-left w-full"
+                        onClick={() => setShowEditProfile(true)}>
                         Edit Profile
                       </button>
-                      <div className="px-1">
+
+                      {/* Settings */}
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button
+                            className="px-3 py-2 rounded-md hover:bg-accent text-sm text-left w-full"
+                            onClick={() => setShowSettings(true)}>
+                            Settings
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-52 p-3">
+                          <Settings />
+                        </PopoverContent>
+                      </Popover>
+
+                      {/* Logout - Pastikan konsisten padding */}
+                      <div className="w-full">
                         <Logout />
                       </div>
                     </div>
@@ -205,6 +220,20 @@ export default function AppSidebar() {
             onUpdate={handleUpdateProfile}
             onClose={() => setShowEditProfile(false)}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog settings */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent
+          className="sm:max-w-[400px]"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle>Settings</DialogTitle>
+          </DialogHeader>
+          <Settings />
         </DialogContent>
       </Dialog>
     </>
