@@ -232,6 +232,9 @@ export default function AppSidebar() {
         >
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
+            <DialogDescription>
+              Pengaturan aplikasi umum.
+            </DialogDescription>
           </DialogHeader>
           <Settings />
         </DialogContent>
