@@ -115,7 +115,7 @@ export async function apiLogout(path) {
   try {
     const tempApi = axios.create({
       baseURL: getBaseApiUrl(),
-      withCredentials: false,
+      withCredentials: true,
       headers: { Accept: "application/json" },
     });
 
