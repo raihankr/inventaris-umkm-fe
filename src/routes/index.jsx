@@ -9,7 +9,6 @@ import MainLayout from "@/layouts/MainLayout";
 import Dashboard from "@/pages/Dashboard/Dashboard";
 import Stok from "@/pages/Stok/Stok";
 import Transaksi from "@/pages/Transaksi/Transaksi";
-import Settings from "@/pages/Settings/Settings";
 import Login from "@/pages/Login/login";
 
 export default function AppRoutes() {
@@ -30,7 +29,6 @@ export default function AppRoutes() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/stok" element={<Stok />} />
           <Route path="/transaksi" element={<Transaksi />} />
-          <Route path="/settings" element={<Settings />} />
         </Route>
 
         {/* Login */}
