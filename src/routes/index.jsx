@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 // landing
@@ -10,30 +10,35 @@ import Dashboard from "@/pages/Dashboard/Dashboard";
 import Stok from "@/pages/Stok/Stok";
 import Transaksi from "@/pages/Transaksi/Transaksi";
 import Login from "@/pages/Login/login";
+import {AuthProvider} from "@/contexts/AuthProvider";
 
 export default function AppRoutes() {
   return (
     <Router>
-      <Routes>
-        {/* Landing Page */}
-        <Route path="/" element={<Landing />} />
+      <AuthProvider>
+        <Routes>
+          {/* Landing Page */}
+          <Route path="/"  element={
+            <Navigate to={ "/login" } />
+          } />
 
-        {/* Main Layout + Protected */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/stok" element={<Stok />} />
-          <Route path="/transaksi" element={<Transaksi />} />
-        </Route>
+          {/* Main Layout + Protected */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <MainLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/stok" element={<Stok />} />
+            <Route path="/transaksi" element={<Transaksi />} />
+          </Route>
 
-        {/* Login */}
-        <Route path="/login" element={<Login />} />
-      </Routes>
+          {/* Login */}
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }

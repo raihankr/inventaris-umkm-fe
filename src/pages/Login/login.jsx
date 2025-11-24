@@ -2,10 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import {apiPost} from "../../lib/api.js";
+import {useAuth} from "../../contexts/AuthContext.js";
+import LoadingPage from "../Loading/loading.jsx";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { refetchAuthStatus, isAuthenticated, isLoading } = useAuth();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -20,6 +24,13 @@ export default function LoginPage() {
     if (message) setShowPopup(true);
   }, [message]);
 
+  if (isAuthenticated && !isLoading)
+    return navigate("/dashboard", { replace: true });
+
+
+  if (isLoading) {
+    return (<LoadingPage />);
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,6 +48,8 @@ export default function LoginPage() {
 
       setShowPopup(false);
       window.history.replaceState({}, "");
+
+      refetchAuthStatus();
 
       navigate("/dashboard");
     } catch (error) {

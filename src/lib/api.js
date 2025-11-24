@@ -31,8 +31,9 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err?.response?.status === 401) {
-      if (!process.env.NODE_ENV || process.env.NODE_ENV === "production") {
-        window.location.reload()
+      if (!import.meta.env.VITE_ENV || import.meta.env.VITE_ENV === "production") {
+        if (window.location.pathname !== '/login')
+        window.location.replace('/login');
       }
     }
     return Promise.reject(err)
