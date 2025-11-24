@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // landing
 import Landing from "@/pages/Landing/landing";
@@ -9,22 +10,23 @@ import Dashboard from "@/pages/Dashboard/Dashboard";
 import Stok from "@/pages/Stok/Stok";
 import Transaksi from "@/pages/Transaksi/Transaksi";
 import Settings from "@/pages/Settings/Settings";
-import Login from "@/pages/Login/login"
+import Login from "@/pages/Login/login";
 
 export default function AppRoutes() {
   return (
     <Router>
       <Routes>
-        {/* path dasar adalah landing */}
-        <Route
-          path="/"
-          element={
-            <Landing />
-          }
-        />
+        {/* Landing Page */}
+        <Route path="/" element={<Landing />} />
 
-        {/* Main layout */}
-        <Route element={<MainLayout />}>
+        {/* Main Layout + Protected */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/stok" element={<Stok />} />
           <Route path="/transaksi" element={<Transaksi />} />
