@@ -126,61 +126,62 @@ export default function AppSidebar() {
 
         {/* Footer: profile + logout */}
         <SidebarFooter className="p-0 border-t">
-          <div className="flex items-center justify-between px-4 py-3 hover:bg-muted rounded-md">
+          <div className="p-2">
+            <div className="flex items-center justify-between rounded-md px-2 py-2 transition-colors duration-200 hover:bg-sidebar-accent group">
 
-            {/* Popover profile */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  className="flex items-center gap-3 flex-1 text-left"
-                  title={open ? undefined : `${user.name} — ${user.username}`}
-                >
-                  <div className="relative h-10 w-10 flex-shrink-0">
-                    <Avatar>
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback>{user.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-green-500 ring-2 ring-background" />
-                  </div>
-                  <div className={`flex flex-col transition-all duration-300 ${open ? "opacity-100 w-auto" : "opacity-0 w-0 overflow-hidden"}`}>
-                    <span className="font-medium text-base">{user.name}</span>
-                    <span className="text-sm text-muted-foreground">@{user.username}</span>
-                  </div>
-                </button>
-              </PopoverTrigger>
+              {/* Profile Section */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="flex items-center gap-2 flex-1 text-left min-w-0">
+                    {/* Avatar*/}
+                    <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                      <Avatar className="h-8 w-8 min-h-6 min-w-6">
+                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarFallback className="text-[8px]">
+                          {user.name[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
 
-              {/* Konten popover profile */}
-              <PopoverContent className="w-56 p-4 ml-3">
-                <Profile
-                  user={user}
-                  onEdit={() => setShowEditProfile(true)}
-                />
-              </PopoverContent>
-            </Popover>
-
-            {/* Popover opsi lainnya */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className="p-2 rounded-md hover:bg-accent flex-shrink-0" aria-label="More options">
-                  <MoreVertical size={20} />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-40 p-2">
-                <div className="flex flex-col">
-                  <button
-                    className="px-3 py-2 rounded-md hover:bg-accent text-sm text-left"
-                    onClick={() => setShowEditProfile(true)}
-                  >
-                    Edit Profile
+                    {/* Text Info */}
+                    <div className={`flex flex-col transition-all duration-300 overflow-hidden ${open ? "opacity-100 max-w-[120px]" : "opacity-0 max-w-0"}`}>
+                      <span className="font-semibold text-sm leading-tight">{user.name}</span>
+                      <span className="text-xs text-muted-foreground leading-tight mt-0.5">@{user.username}</span>
+                    </div>
                   </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56 p-4 ml-3">
+                  <Profile
+                    user={user}
+                    onEdit={() => setShowEditProfile(true)}
+                  />
+                </PopoverContent>
+              </Popover>
 
-                  {/* Ganti tombol logout inline sebelumnya -> gunakan komponen Logout */}
-                  <div className="px-1">
-                    <Logout />
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+              {/* More Options */}
+              <div className={`transition-all duration-300 ${open ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="p-1 rounded-md hover:bg-accent">
+                      <MoreVertical size={14} />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-40 p-2">
+                    <div className="flex flex-col">
+                      <button
+                        className="px-3 py-2 rounded-md hover:bg-accent text-sm text-left"
+                        onClick={() => setShowEditProfile(true)}
+                      >
+                        Edit Profile
+                      </button>
+                      <div className="px-1">
+                        <Logout />
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
           </div>
         </SidebarFooter>
       </Sidebar>
