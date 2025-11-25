@@ -87,7 +87,7 @@ export default function StokUMKM() {
   };
 
   const handleSubmit = () => {
-    if (!formData.nama || !formData.kategori || formData.stok === '' || 
+    if (!formData.nama || !formData.kategori || formData.stok === '' || formData.stok === null ||
         !formData.harga || !formData.satuan || !formData.minimal) {
       alert('Mohon lengkapi semua field');
       return;
@@ -162,8 +162,9 @@ export default function StokUMKM() {
         
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-gray-800 to-black bg-clip-text text-transparent">
-            Manajemen Stok 
+            Manajemen Stok UMKM
           </h1>
+          <p className="text-gray-600">Kelola inventaris produk UMKM Anda dengan mudah</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -390,9 +391,13 @@ export default function StokUMKM() {
                     <input
                       type="number"
                       value={formData.stok}
-                      onChange={(e) => setFormData({ ...formData, stok: parseInt(e.target.value) || '' })}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFormData({ ...formData, stok: value === '' ? '' : parseInt(value) });
+                      }}
                       className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
-                      placeholder="50"
+                      placeholder="0"
+                      min="0"
                     />
                   </div>
                   <div>
