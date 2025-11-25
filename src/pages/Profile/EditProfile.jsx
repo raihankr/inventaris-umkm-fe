@@ -165,7 +165,7 @@ export default function EditProfile({ user, onUpdate, onClose }) {
       </div>
 
       {/* Footer Isinya Button */}
-      <div className="flex justify-between mt-4 sticky bottom-0 bg-white py-2 border-t">
+      <div className="flex justify-between mt-4 sticky bottom-0 bg-background py-2 border-t">
         <Button variant="outline" onClick={onClose}>
           Tutup
         </Button>

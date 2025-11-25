@@ -38,11 +38,11 @@ import Logout from "@/pages/Login/logout.jsx";
 import Settings from "@/pages/Settings/Settings";
 import { Button } from "@/components/ui/button";
 
-import ProjectLogo from "@/assets/icons/academicons--open-data.svg";
-import DashboardLogo from "@/assets/icons/material-symbols--dashboard-outline-rounded.svg";
-import StokLogo from "@/assets/icons//game-icons--sell-card.svg";
-import TransaksiLogo from "@/assets/icons/fluent--money-16-filled.svg";
-import SettingsLogo from "@/assets/icons//material-symbols--settings.svg";
+import ProjectLogo from "@/assets/icons/academicons--open-data.svg?react";
+import DashboardLogo from "@/assets/icons/material-symbols--dashboard-outline-rounded.svg?react";
+import StokLogo from "@/assets/icons/game-icons--sell-card.svg?react";
+import TransaksiLogo from "@/assets/icons/fluent--money-16-filled.svg?react";
+import SettingsLogo from "@/assets/icons/material-symbols--settings.svg?react";
 
 export default function AppSidebar() {
   const { open } = useSidebar(); // open close status sidebar
@@ -81,11 +81,7 @@ export default function AppSidebar() {
         <SidebarHeader className="px-0 py-2 h-12 border-b ">
           <div className="w-full px-4 flex items-center">
             <Link to="/dashboard" className="flex items-center gap-3">
-              <img
-                src={ProjectLogo}
-                alt="Invertaris UMKM"
-                className="h-6 w-6 object-contain icon"
-              />
+              <ProjectLogo className="h-6 w-6" />
               <span className={`font-semibold text-base mt-1 transition-all duration-200 whitespace-nowrap ${open ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}>
                 INVERTARIS UMKM
               </span>
@@ -109,7 +105,7 @@ export default function AppSidebar() {
                         >
                           <div className="flex items-center rounded-md px-4 py-5">
                             {typeof item.icon === "string" ? (
-                              <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain icon" />
+                              <item.icon className="h-5 w-5 icon text-foreground" />
                             ) : (
                               <item.icon size={20} />
                             )}
@@ -134,8 +130,9 @@ export default function AppSidebar() {
               <Popover>
                 <PopoverTrigger asChild>
                   <button className="flex items-center gap-2 flex-1 text-left min-w-0">
+
                     {/* Avatar*/}
-                    <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                    <div className="flex-shrink-0">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={user.avatar || "https://ui.shadcn.com/avatars/01.png"} />
                         <AvatarFallback>
