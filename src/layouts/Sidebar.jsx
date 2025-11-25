@@ -84,7 +84,7 @@ export default function AppSidebar() {
               <img
                 src={ProjectLogo}
                 alt="Invertaris UMKM"
-                className="h-6 w-6 object-contain"
+                className="h-6 w-6 object-contain icon"
               />
               <span className={`font-semibold text-base mt-1 transition-all duration-200 whitespace-nowrap ${open ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}>
                 INVERTARIS UMKM
@@ -109,7 +109,7 @@ export default function AppSidebar() {
                         >
                           <div className="flex items-center rounded-md px-4 py-5">
                             {typeof item.icon === "string" ? (
-                              <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain" />
+                              <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain icon" />
                             ) : (
                               <item.icon size={20} />
                             )}
@@ -229,14 +229,13 @@ export default function AppSidebar() {
       {/* Dialog settings */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent
-          className="sm:max-w-[400px]"
+          className="sm:max-w-[600px]"
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
             <DialogDescription>
-              Pengaturan aplikasi umum.
             </DialogDescription>
           </DialogHeader>
           <Settings />
