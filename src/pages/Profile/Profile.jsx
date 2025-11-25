@@ -13,7 +13,7 @@ export default function Profile({ user, onEdit }) {
 
       {/* Avatar */}
       <Avatar className="w-24 h-24">
-        <AvatarImage src={user.avatar} alt={user.username || user.name} />
+        <AvatarImage src={user.avatar || ""} alt={user.username || user.name || "user"} />
         <AvatarFallback>
           {(user.username?.[0] || user.name?.[0] || '?').toUpperCase()}
         </AvatarFallback>

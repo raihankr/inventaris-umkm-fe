@@ -7,15 +7,13 @@ import { ValidateProfile } from "./ValidateProfile";
 
 export default function EditProfile({ user, onUpdate, onClose }) {
   // State buat handle semua logic form data
-  const [name, setName] = useState(user.name);
+  const [name, setName] = useState(user.name || "");
   const [username, setUsername] = useState(user.username || "");
-  const [email, setEmail] = useState(user.email);
+  const [email, setEmail] = useState(user.email || "");
   const [phone, setPhone] = useState(user.contact?.phone || "");
   const [address, setAddress] = useState(user.contact?.address || "");
-
-  // State fungsinya untuk upload avatar
   const [avatarFile, setAvatarFile] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState(user.avatar);
+  const [avatarPreview, setAvatarPreview] = useState(user.avatar || "");
 
   // State untuk error validasi (pake yup di validateprofile.jsx)
   const [errors, setErrors] = useState({});
@@ -46,9 +44,9 @@ export default function EditProfile({ user, onUpdate, onClose }) {
     try {
       // Reset error sebelum validasi ulang
       setErrors({});
-       // Validasi form dengan Yup
+      // Validasi form dengan Yup
       await ValidateProfile.validate(updatedUser, { abortEarly: false });
-            // Jika valid, kirim data ke parent untuk disimpan / API call
+      // Jika valid, kirim data ke parent untuk disimpan / API call
       if (onUpdate) onUpdate(updatedUser);
     } catch (err) {
       if (err.inner?.length > 0) {

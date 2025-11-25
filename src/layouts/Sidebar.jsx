@@ -26,6 +26,8 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 
+import { useAuth } from "@/contexts/AuthContext"; // untuk ambil data user
+
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { MoreVertical } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
@@ -55,14 +57,15 @@ export default function AppSidebar() {
     { icon: StokLogo, label: "Stok Barang", href: "/stok" },
   ];
 
-  // State user (nama, email, avatar, role)
-  const [user, setUser] = useState({
-    username: "johndoe69",
-    name: "John Doe",
-    email: "john@example.com",
-    avatar: "https://ui.shadcn.com/avatars/01.png",
-    role: "Admin",
-  });
+  // Ambil data user dari context
+  const { userInfo } = useAuth();
+  const user = userInfo || {
+    username: "loading...",
+    name: "Loading...",
+    email: "",
+    avatar: "",
+    role: "",
+  };
 
   // Update data user setelah edit profile
   const handleUpdateProfile = (updatedUser) => {
@@ -133,10 +136,10 @@ export default function AppSidebar() {
                   <button className="flex items-center gap-2 flex-1 text-left min-w-0">
                     {/* Avatar*/}
                     <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
-                      <Avatar className="h-8 w-8 min-h-6 min-w-6">
-                        <AvatarImage src={user.avatar} alt={user.name} />
-                        <AvatarFallback className="text-[8px]">
-                          {user.name[0]}
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.avatar || "https://ui.shadcn.com/avatars/01.png"} />
+                        <AvatarFallback>
+                          {user.name ? user.name[0] : "U"}
                         </AvatarFallback>
                       </Avatar>
                     </div>
@@ -150,7 +153,7 @@ export default function AppSidebar() {
                 </PopoverTrigger>
                 <PopoverContent className="w-56 p-4 ml-3">
                   <Profile
-                    user={user}
+                    user={userInfo}
                     onEdit={() => setShowEditProfile(true)}
                   />
                 </PopoverContent>
@@ -216,7 +219,7 @@ export default function AppSidebar() {
           </DialogHeader>
 
           <EditProfile
-            user={user}
+            user={userInfo}
             onUpdate={handleUpdateProfile}
             onClose={() => setShowEditProfile(false)}
           />
