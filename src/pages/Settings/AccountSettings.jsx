@@ -72,7 +72,7 @@ export default function AccountSettings() {
             name="currentPassword"
             value={form.currentPassword}
             onChange={handleChange}
-            placeholder="••••••••"
+            placeholder="Masukkan Password Saat Ini"
           />
 
           <button
@@ -101,7 +101,7 @@ export default function AccountSettings() {
             name="newPassword"
             value={form.newPassword}
             onChange={handleChange}
-            placeholder="••••••••"
+            placeholder="Masukkan Password Baru"
           />
 
           <button
@@ -130,7 +130,7 @@ export default function AccountSettings() {
             name="confirmPassword"
             value={form.confirmPassword}
             onChange={handleChange}
-            placeholder="••••••••"
+            placeholder="Konfirmasi Password Baru"
           />
 
           <button
