@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Search, Package, AlertTriangle, AlertCircle, XCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Package, AlertTriangle, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function StokUMKM() {
   const [stokBarang, setStokBarang] = useState([
@@ -13,55 +13,112 @@ export default function StokUMKM() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
   const [formData, setFormData] = useState({
-    nama: '', kategori: '', stok: '', harga: '', satuan: '', minimal: ''
+    nama: '',
+    kategori: '',
+    stok: '',
+    harga: '',
+    satuan: '',
+    minimal: ''
   });
 
   const getStatus = (stok, minimal) => {
     if (stok === 0) {
-      return { label: 'Habis', color: 'bg-gray-900/20 text-gray-900 border-gray-900/30', icon: XCircle };
-    } else if (stok <= minimal * 0.25) {
-      return { label: 'Hampir Habis', color: 'bg-gray-800/20 text-gray-800 border-gray-800/30', icon: AlertCircle };
-    } else if (stok <= minimal * 0.5) {
-      return { label: 'Stok Menipis', color: 'bg-gray-600/20 text-gray-700 border-gray-600/30', icon: AlertTriangle };
+      return { 
+        label: 'Habis', 
+        color: 'bg-red-500/20 text-red-600 border-red-500/30', 
+        icon: XCircle 
+      };
+    } else if (stok <= minimal) {
+      return { 
+        label: 'Perlu Restock', 
+        color: 'bg-yellow-500/20 text-yellow-600 border-yellow-500/30', 
+        icon: AlertTriangle 
+      };
     } else {
-      return { label: 'Tersedia', color: 'bg-gray-300/50 text-gray-800 border-gray-400/30', icon: Package };
+      return { 
+        label: 'Tersedia', 
+        color: 'bg-green-500/20 text-green-600 border-green-500/30', 
+        icon: Package 
+      };
     }
   };
 
   const getStatsData = () => {
-    const tersedia = stokBarang.filter(item => getStatus(item.stok, item.minimal).label === 'Tersedia').length;
-    const menipis = stokBarang.filter(item => getStatus(item.stok, item.minimal).label === 'Stok Menipis').length;
-    const hampirHabis = stokBarang.filter(item => getStatus(item.stok, item.minimal).label === 'Hampir Habis').length;
-    const habis = stokBarang.filter(item => getStatus(item.stok, item.minimal).label === 'Habis').length;
+    const tersedia = stokBarang.filter(item => {
+      const status = getStatus(item.stok, item.minimal);
+      return status.label === 'Tersedia';
+    }).length;
 
-    return { tersedia, menipis, hampirHabis, habis };
+    const perluRestock = stokBarang.filter(item => {
+      const status = getStatus(item.stok, item.minimal);
+      return status.label === 'Perlu Restock';
+    }).length;
+
+    const habis = stokBarang.filter(item => {
+      const status = getStatus(item.stok, item.minimal);
+      return status.label === 'Habis';
+    }).length;
+
+    return { tersedia, perluRestock, habis };
   };
 
   const stats = getStatsData();
-  const totalNilai = stokBarang.reduce((acc, item) => acc + (item.stok * item.harga), 0);
+  
+  const totalNilai = stokBarang.reduce((total, item) => {
+    return total + (item.stok * item.harga);
+  }, 0);
 
-  const filteredStok = stokBarang.filter(item =>
-    item.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.kategori.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredStok = stokBarang.filter(item => {
+    const namaMatch = item.nama.toLowerCase().includes(searchTerm.toLowerCase());
+    const kategoriMatch = item.kategori.toLowerCase().includes(searchTerm.toLowerCase());
+    return namaMatch || kategoriMatch;
+  });
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredStok.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredStok.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handleSubmit = () => {
-    if (!formData.nama || !formData.kategori || formData.stok === '' || !formData.harga || !formData.satuan || !formData.minimal) {
+    if (!formData.nama || !formData.kategori || formData.stok === '' || formData.stok === null ||
+        !formData.harga || !formData.satuan || !formData.minimal) {
       alert('Mohon lengkapi semua field');
       return;
     }
     
     if (editingId) {
-      setStokBarang(stokBarang.map(item =>
-        item.id === editingId ? { ...formData, id: editingId } : item
-      ));
+      const updatedStok = stokBarang.map(item => {
+        if (item.id === editingId) {
+          return { ...formData, id: editingId };
+        }
+        return item;
+      });
+      setStokBarang(updatedStok);
     } else {
-      setStokBarang([...stokBarang, { ...formData, id: Date.now() }]);
+      const newItem = {
+        ...formData,
+        id: Date.now()
+      };
+      setStokBarang([...stokBarang, newItem]);
     }
+    
     setShowModal(false);
     setEditingId(null);
-    setFormData({ nama: '', kategori: '', stok: '', harga: '', satuan: '', minimal: '' });
+    setFormData({ 
+      nama: '', 
+      kategori: '', 
+      stok: '', 
+      harga: '', 
+      satuan: '', 
+      minimal: '' 
+    });
   };
 
   const handleEdit = (item) => {
@@ -71,13 +128,32 @@ export default function StokUMKM() {
   };
 
   const handleDelete = (id) => {
-    if (confirm('Yakin ingin menghapus barang ini?')) {
-      setStokBarang(stokBarang.filter(item => item.id !== id));
+    const confirmDelete = confirm('Yakin ingin menghapus barang ini?');
+    if (confirmDelete) {
+      const updatedStok = stokBarang.filter(item => item.id !== id);
+      setStokBarang(updatedStok);
     }
   };
 
   const formatRupiah = (angka) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+    return new Intl.NumberFormat('id-ID', { 
+      style: 'currency', 
+      currency: 'IDR', 
+      minimumFractionDigits: 0 
+    }).format(angka);
+  };
+
+  const handleTambahBarang = () => {
+    setShowModal(true);
+    setEditingId(null);
+    setFormData({ 
+      nama: '', 
+      kategori: '', 
+      stok: '', 
+      harga: '', 
+      satuan: '', 
+      minimal: '' 
+    });
   };
 
   return (
@@ -96,7 +172,7 @@ export default function StokUMKM() {
       
 
       <div className="max-w-7xl mx-auto">
-
+        
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-gray-800 to-black bg-clip-text text-transparent">
             Manajemen Stok UMKM
@@ -104,55 +180,42 @@ export default function StokUMKM() {
           <p className="text-gray-600">Kelola inventaris produk UMKM Anda dengan mudah</p>
         </div>
 
-        
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-gray-200 shadow-sm transition-all">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-green-50 rounded-xl p-5 border-2 border-green-200 shadow-sm hover:shadow-md transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-xs sm:text-sm mb-1">Tersedia</p>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-800">{stats.tersedia}</p>
+                <p className="text-green-700 text-sm mb-1">Tersedia</p>
+                <p className="text-3xl font-bold text-green-800">{stats.tersedia}</p>
               </div>
-              <Package className="text-gray-800" size={32} />
+              <Package className="text-green-600" size={36} />
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-gray-300 shadow-sm transition-all">
+          <div className="bg-yellow-50 rounded-xl p-5 border-2 border-yellow-200 shadow-sm hover:shadow-md transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-xs sm:text-sm mb-1">Stok Menipis</p>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-700">{stats.menipis}</p>
+                <p className="text-yellow-700 text-sm mb-1">Perlu Restock</p>
+                <p className="text-3xl font-bold text-yellow-800">{stats.perluRestock}</p>
               </div>
-              <AlertTriangle className="text-gray-700" size={32} />
+              <AlertTriangle className="text-yellow-600" size={36} />
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-gray-400 shadow-sm transition-all">
+          <div className="bg-red-50 rounded-xl p-5 border-2 border-red-200 shadow-sm hover:shadow-md transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-xs sm:text-sm mb-1">Hampir Habis</p>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-800">{stats.hampirHabis}</p>
+                <p className="text-red-700 text-sm mb-1">Habis</p>
+                <p className="text-3xl font-bold text-red-800">{stats.habis}</p>
               </div>
-              <AlertCircle className="text-gray-800" size={32} />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-gray-900 shadow-sm transition-all">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-xs sm:text-sm mb-1">Habis</p>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.habis}</p>
-              </div>
-              <XCircle className="text-gray-900" size={32} />
+              <XCircle className="text-red-600" size={36} />
             </div>
           </div>
         </div>
 
-
-        <div className="bg-gradient-to-r from-gray-800 to-black rounded-xl p-5 sm:p-6 mb-6 text-white shadow-lg">
+        <div className="bg-gradient-to-r from-gray-800 to-black rounded-xl p-6 mb-6 text-white shadow-lg">
           <p className="text-gray-300 text-sm mb-1">Total Nilai Inventaris</p>
           <p className="text-2xl sm:text-3xl font-bold">{formatRupiah(totalNilai)}</p>
         </div>
-
 
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
@@ -165,55 +228,17 @@ export default function StokUMKM() {
               className="w-full bg-white border-2 border-gray-300 rounded-lg pl-12 pr-4 py-2 md:py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-gray-800 transition-all"
             />
           </div>
-
+          
           <button
-            onClick={() => {
-              setShowModal(true);
-              setEditingId(null);
-              setFormData({ nama: '', kategori: '', stok: '', harga: '', satuan: '', minimal: '' });
-            }}
-            className="hidden sm:flex bg-gray-900 hover:bg-black text-white px-6 py-2 sm:py-3 rounded-lg font-semibold items-center gap-2 transition-all shadow-lg"
+            onClick={handleTambahBarang}
+            className="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg"
           >
             <Plus size={20} />
             Tambah Barang
           </button>
         </div>
 
-
-        
-        <div className="block md:hidden space-y-4 px-2">
-          {filteredStok.map(item => {
-            const status = getStatus(item.stok, item.minimal);
-            const StatusIcon = status.icon;
-            return (
-              <div key={item.id} className="bg-white p-4 rounded-xl shadow border border-gray-200">
-                <div className="flex justify-between">
-                  <div>
-                    <p className="font-bold text-gray-800">{item.nama}</p>
-                    <p className="text-gray-500 text-sm">{item.kategori}</p>
-                  </div>
-                  <span className={`px-2 py-1 text-xs ${status.color} rounded-full flex items-center gap-1`}>
-                    <StatusIcon size={12}/> {status.label}
-                  </span>
-                </div>
-                
-                <div className="mt-3 text-sm">
-                  <p>Stok: <b>{item.stok}</b> {item.satuan}</p>
-                  <p>Harga: <b>{formatRupiah(item.harga)}</b></p>
-                </div>
-
-                <div className="flex gap-2 mt-4">
-                  <button onClick={() => handleEdit(item)} className="flex-1 bg-gray-900 text-white py-2 rounded-lg text-sm">Edit</button>
-                  <button onClick={() => handleDelete(item.id)} className="flex-1 bg-gray-700 text-white py-2 rounded-lg text-sm">Hapus</button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-
-
-        <div className="bg-white rounded-xl border-2 border-gray-300 overflow-hidden shadow-lg hidden md:block">
+        <div className="bg-white rounded-xl border-2 border-gray-300 overflow-hidden shadow-lg">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gradient-to-r from-gray-800 to-black text-white">
@@ -226,30 +251,39 @@ export default function StokUMKM() {
                   <th className="px-6 py-4 text-center text-sm font-semibold">Aksi</th>
                 </tr>
               </thead>
+              
               <tbody className="divide-y divide-gray-200">
-                {filteredStok.map((item) => {
+                {currentItems.map((item) => {
                   const status = getStatus(item.stok, item.minimal);
                   const StatusIcon = status.icon;
+                  
                   return (
                     <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="font-medium text-gray-800">{item.nama}</div>
                         <div className="text-sm text-gray-500">{item.satuan}</div>
                       </td>
+                      
                       <td className="px-6 py-4">
                         <span className="px-3 py-1 bg-gray-200 text-gray-800 rounded-full text-sm font-medium">
                           {item.kategori}
                         </span>
                       </td>
+                      
                       <td className="px-6 py-4 text-center">
                         <span className="text-lg font-semibold text-gray-800">{item.stok}</span>
                       </td>
-                      <td className="px-6 py-4 text-right font-medium text-gray-800">{formatRupiah(item.harga)}</td>
+                      
+                      <td className="px-6 py-4 text-right font-medium text-gray-800">
+                        {formatRupiah(item.harga)}
+                      </td>
+                      
                       <td className="px-6 py-4 text-center">
                         <span className={`px-3 py-1 ${status.color} border rounded-full text-sm font-medium inline-flex items-center gap-1`}>
                           <StatusIcon size={14} /> {status.label}
                         </span>
                       </td>
+                      
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
@@ -258,6 +292,7 @@ export default function StokUMKM() {
                           >
                             <Edit2 size={16} />
                           </button>
+                          
                           <button
                             onClick={() => handleDelete(item.id)}
                             className="p-2 bg-gray-700 hover:bg-gray-900 text-white rounded-lg transition-all"
@@ -274,68 +309,150 @@ export default function StokUMKM() {
           </div>
         </div>
 
+        {filteredStok.length > itemsPerPage && (
+          <div className="mt-6 flex items-center justify-between bg-white rounded-xl border-2 border-gray-300 p-4">
+            <div className="text-sm text-gray-600">
+              Menampilkan {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredStok.length)} dari {filteredStok.length} barang
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`p-2 rounded-lg transition-all ${
+                  currentPage === 1
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-800 text-white hover:bg-black'
+                }`}
+              >
+                <ChevronLeft size={20} />
+              </button>
+              
+              <div className="flex gap-1">
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNumber = index + 1;
+                  return (
+                    <button
+                      key={pageNumber}
+                      onClick={() => handlePageChange(pageNumber)}
+                      className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                        currentPage === pageNumber
+                          ? 'bg-gray-900 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`p-2 rounded-lg transition-all ${
+                  currentPage === totalPages
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-800 text-white hover:bg-black'
+                }`}
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
+        )}
 
         {showModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-6">
-            <div className="bg-white rounded-xl border-2 border-gray-300 p-6 w-full max-w-sm sm:max-w-md shadow-2xl">
-              <h2 className="text-2xl font-bold mb-6 text-gray-800">{editingId ? 'Edit Barang' : 'Tambah Barang Baru'}</h2>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl border-2 border-gray-300 p-6 w-full max-w-md shadow-2xl">
+              <h2 className="text-2xl font-bold mb-6 text-gray-800">
+                {editingId ? 'Edit Barang' : 'Tambah Barang Baru'}
+              </h2>
+              
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Nama Barang</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nama Barang
+                  </label>
                   <input
                     type="text"
                     value={formData.nama}
                     onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
                     className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                    placeholder="Contoh: Kemeja Batik"
                   />
                 </div>
+                
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Kategori
+                  </label>
                   <input
                     type="text"
                     value={formData.kategori}
                     onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
                     className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                    placeholder="Contoh: Pakaian"
                   />
                 </div>
+                
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Stok</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Stok
+                    </label>
                     <input
                       type="number"
                       value={formData.stok}
-                      onChange={(e) => setFormData({ ...formData, stok: parseInt(e.target.value) || '' })}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFormData({ ...formData, stok: value === '' ? '' : parseInt(value) });
+                      }}
                       className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                      placeholder="0"
+                      min="0"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Satuan</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Satuan
+                    </label>
                     <input
                       type="text"
                       value={formData.satuan}
                       onChange={(e) => setFormData({ ...formData, satuan: e.target.value })}
                       className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                      placeholder="pcs"
                     />
                   </div>
                 </div>
+                
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Harga</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Harga
+                  </label>
                   <input
                     type="number"
                     value={formData.harga}
                     onChange={(e) => setFormData({ ...formData, harga: parseInt(e.target.value) || '' })}
                     className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                    placeholder="150000"
                   />
                 </div>
+                
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Stok Minimal</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Stok Minimal
+                  </label>
                   <input
                     type="number"
                     value={formData.minimal}
                     onChange={(e) => setFormData({ ...formData, minimal: parseInt(e.target.value) || '' })}
                     className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                    placeholder="10"
                   />
                 </div>
+                
                 <div className="flex gap-3 mt-6">
                   <button
                     onClick={handleSubmit}
