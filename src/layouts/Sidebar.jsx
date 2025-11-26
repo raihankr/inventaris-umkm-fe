@@ -69,7 +69,7 @@ export default function AppSidebar() {
 
   // Update data user setelah edit profile
   const handleUpdateProfile = (updatedUser) => {
-    setUser(updatedUser);
+    // setUser(updatedUser);
     setShowEditProfile(false);
   };
 
@@ -216,7 +216,6 @@ export default function AppSidebar() {
           </DialogHeader>
 
           <EditProfile
-            user={userInfo}
             onUpdate={handleUpdateProfile}
             onClose={() => setShowEditProfile(false)}
           />
