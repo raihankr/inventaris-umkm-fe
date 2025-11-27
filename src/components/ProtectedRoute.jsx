@@ -7,7 +7,7 @@ export default function ProtectedRoute({ children, allowedRoles }) {
 
   if (isLoading) {
     // TODO: Isi page/animasi loading di sini
-    return (<LoadingPage />);
+    return <LoadingPage />;
   }
 
   if (!isAuthenticated) {
@@ -22,7 +22,7 @@ export default function ProtectedRoute({ children, allowedRoles }) {
     );
   }
 
-  if (allowedRoles && allowedRoles.include(userInfo.role)) {
+  if (allowedRoles && !allowedRoles.includes(userInfo.role)) {
     return (
       <Navigate
         to="/dashboard"

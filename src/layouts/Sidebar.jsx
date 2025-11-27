@@ -42,12 +42,13 @@ import ProjectLogo from "@/assets/icons/academicons--open-data.svg?react";
 import DashboardLogo from "@/assets/icons/material-symbols--dashboard-outline-rounded.svg?react";
 import StokLogo from "@/assets/icons/game-icons--sell-card.svg?react";
 import TransaksiLogo from "@/assets/icons/fluent--money-16-filled.svg?react";
-import SettingsLogo from "@/assets/icons/material-symbols--settings.svg?react";
+import UserLogo from "@/assets/icons/mingcute--user-3-fill.svg?react";
 
 export default function AppSidebar() {
   const { open } = useSidebar(); // open close status sidebar
   const [showEditProfile, setShowEditProfile] = useState(false); // dialog edit profile
   const [showSettings, setShowSettings] = useState(false); // dialog settings
+  const { userInfo } = useAuth();
 
 
   // Daftar menu sidebar
@@ -57,8 +58,11 @@ export default function AppSidebar() {
     { icon: StokLogo, label: "Stok Barang", href: "/stok" },
   ];
 
+  if (userInfo.role === "admin")
+    menuItems.push(
+      { icon: UserLogo, label: "Manajemen User", href: "/users" },
+    );
   // Ambil data user dari context
-  const { userInfo } = useAuth();
   const user = userInfo || {
     username: "loading...",
     name: "Loading...",
