@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import {apiPost} from "../../lib/api.js";
-import {useAuth} from "../../contexts/AuthContext.js";
+import { apiPost } from "../../lib/api.js";
+import { useAuth } from "../../contexts/AuthContext.js";
 import LoadingPage from "../Loading/loading.jsx";
 
 export default function LoginPage() {
@@ -27,9 +27,8 @@ export default function LoginPage() {
   if (isAuthenticated && !isLoading)
     return navigate("/dashboard", { replace: true });
 
-
   if (isLoading) {
-    return (<LoadingPage />);
+    return <LoadingPage />;
   }
 
   const handleSubmit = async (e) => {
@@ -37,31 +36,30 @@ export default function LoginPage() {
     setLoading(true);
     setErrorMessage(""); // reset error
 
-    try {
-      const response = await apiPost('/auth/login', { username, password });
+    const response = await apiPost("/auth/login", { username, password });
 
-      if (response.status != 200) {
-        setErrorMessage("Username atau Password salah.");
-        setLoading(false);
-        return;
-      }
-
-      setShowPopup(false);
-      window.history.replaceState({}, "");
-
-      refetchAuthStatus();
-
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("Error:", error);
-      setErrorMessage("Terjadi kesalahan server. Coba lagi nanti.");
+    if (response.status >= 500) {
+      setErrorMessage("Terjadi kesalahan pada server. Coba lagi nanti");
       setLoading(false);
+      return;
     }
+
+    if (response.status == 400) {
+      setErrorMessage("Username atau Password salah.");
+      setLoading(false);
+      return;
+    }
+
+    setShowPopup(false);
+    window.history.replaceState({}, "");
+
+    refetchAuthStatus();
+
+    navigate("/dashboard");
   };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
-
       {/* Popup protected route */}
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
@@ -92,7 +90,6 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold mb-6 text-black">Login</h1>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
-            
             <div>
               <label className="text-sm font-medium text-gray-800">
                 Username
@@ -132,9 +129,7 @@ export default function LoginPage() {
             </div>
 
             {errorMessage && (
-              <p className="text-red-600 text-sm -mt-2">
-                {errorMessage}
-              </p>
+              <p className="text-red-600 text-sm -mt-2">{errorMessage}</p>
             )}
 
             <button

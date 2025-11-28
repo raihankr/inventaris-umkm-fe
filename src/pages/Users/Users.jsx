@@ -28,8 +28,8 @@ export default function Users() {
     { name: "Aksi" },
   ];
 
-  const currentPage = parseInt(searchParams.get("page") || "1", 10);
-  const limit = parseInt(searchParams.get("limit") || "10", 10);
+  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page") || "1"));
+  const limit = parseInt(searchParams.get("limit") || "5");
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -38,7 +38,7 @@ export default function Users() {
       const result = await apiGet(GET_USERS(currentPage, limit));
       setData(result.data.result);
     } catch (err) {
-      setError("Failed to fetch data: " + err.message);
+      setError("Failed to fetch data");
     } finally {
       setLoading(false);
     }
@@ -99,7 +99,6 @@ export default function Users() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const itemsPerPage = 5;
   const [formData, setFormData] = useState({
     nama: "",
     kategori: "",
@@ -109,22 +108,9 @@ export default function Users() {
     minimal: "",
   });
 
-  const filteredStok = stokBarang.filter((item) => {
-    const namaMatch = item.nama
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const kategoriMatch = item.kategori
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    return namaMatch || kategoriMatch;
-  });
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const totalPages = Math.ceil(filteredStok.length / itemsPerPage);
-
   const handlePageChange = (newPage) => {
-    if (newPage < 1 || newPage > totalPages || newPage === currentPage) return;
+    if (newPage < 1 || newPage > data.total_page || newPage === data.page) return;
+    setCurrentPage(newPage)
 
     setSearchParams((prev) => {
       const newParams = new URLSearchParams(prev);
@@ -187,14 +173,6 @@ export default function Users() {
       const updatedStok = stokBarang.filter((item) => item.id !== id);
       setStokBarang(updatedStok);
     }
-  };
-
-  const formatRupiah = (angka) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(angka);
   };
 
   const handleTambahBarang = () => {
@@ -271,7 +249,11 @@ export default function Users() {
         <div className="bg-white rounded-xl border-2 border-gray-300 overflow-hidden shadow-lg">
           <div className="overflow-x-auto">
             {loading ? (
-              <LoadingPage />
+              <LoadingPage full />
+            ) : error ? (
+              <div className="w-full h-full p-20 flex items-center justify-center">
+                {error}
+              </div>
             ) : (
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-gray-800 to-black text-white">
@@ -310,10 +292,10 @@ export default function Users() {
                           </span>
                         </td>
 
-                        { ["email", "contact"].map((field) => (
-                            <td className="px-6 py-4">
-                              {user[field] || "Tidak ada"}
-                            </td>
+                        {["email", "contact"].map((field) => (
+                          <td className="px-6 py-4" key={field}>
+                            {user[field] || "Tidak ada"}
+                          </td>
                         ))}
 
                         <td className="px-6 py-4">
@@ -342,20 +324,20 @@ export default function Users() {
           </div>
         </div>
 
-        {filteredStok.length > itemsPerPage && (
+        {data.total_page > 1 && (
           <div className="mt-6 flex items-center justify-between bg-white rounded-xl border-2 border-gray-300 p-4">
             <div className="text-sm text-gray-600">
-              Menampilkan {indexOfFirstItem + 1} -{" "}
-              {Math.min(indexOfLastItem, filteredStok.length)} dari{" "}
-              {filteredStok.length} barang
+              Menampilkan {data.limit * (data.page - 1) + 1} -{" "}
+              {data.limit * data.page} dari {data.count /* total user */}{" "}
+              user
             </div>
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
+                onClick={() => handlePageChange(data.page - 1)}
+                disabled={data.page === 1}
                 className={`p-2 rounded-lg transition-all ${
-                  currentPage === 1
+                  data.page === 1
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                     : "bg-gray-800 text-white hover:bg-black"
                 }`}
@@ -364,14 +346,14 @@ export default function Users() {
               </button>
 
               <div className="flex gap-1">
-                {[...Array(totalPages)].map((_, index) => {
+                {[...Array(data.total_page)].map((_, index) => {
                   const pageNumber = index + 1;
                   return (
                     <button
                       key={pageNumber}
                       onClick={() => handlePageChange(pageNumber)}
                       className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                        currentPage === pageNumber
+                        data.page === pageNumber
                           ? "bg-gray-900 text-white"
                           : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                       }`}
@@ -383,10 +365,10 @@ export default function Users() {
               </div>
 
               <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(data.page + 1)}
+                disabled={data.page == data.total_page}
                 className={`p-2 rounded-lg transition-all ${
-                  currentPage === totalPages
+                  data.page === data.total_page
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                     : "bg-gray-800 text-white hover:bg-black"
                 }`}
