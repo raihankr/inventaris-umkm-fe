@@ -8,11 +8,14 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCw,
+  EllipsisVertical,
 } from "lucide-react";
 import { apiGet } from "../../lib/api.js";
 import { GET_USERS } from "../../constants/api/user.js";
 import { useSearchParams } from "react-router-dom";
 import LoadingPage from "../Loading/loading.jsx";
+import { Popover } from "../../components/ui/popover.jsx";
+import { PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
 
 export default function Users() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,10 +28,13 @@ export default function Users() {
     { name: "Role", className: "text-left" },
     { name: "Email", className: "text-left" },
     { name: "Kontak", className: "text-left" },
+    { name: "Alamat", className: "text-left" },
     { name: "Aksi" },
   ];
 
-  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get("page") || "1"));
+  const [currentPage, setCurrentPage] = useState(
+    parseInt(searchParams.get("page") || "1"),
+  );
   const limit = parseInt(searchParams.get("limit") || "5");
 
   const fetchData = useCallback(async () => {
@@ -109,8 +115,9 @@ export default function Users() {
   });
 
   const handlePageChange = (newPage) => {
-    if (newPage < 1 || newPage > data.total_page || newPage === data.page) return;
-    setCurrentPage(newPage)
+    if (newPage < 1 || newPage > data.total_page || newPage === data.page)
+      return;
+    setCurrentPage(newPage);
 
     setSearchParams((prev) => {
       const newParams = new URLSearchParams(prev);
@@ -292,27 +299,31 @@ export default function Users() {
                           </span>
                         </td>
 
-                        {["email", "contact"].map((field) => (
+                        {["email", "contact", "address"].map((field) => (
                           <td className="px-6 py-4" key={field}>
                             {user[field] || "Tidak ada"}
                           </td>
                         ))}
 
                         <td className="px-6 py-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              onClick={() => handleEdit(user)}
-                              className="p-2 bg-gray-800 hover:bg-black text-white rounded-lg transition-all"
-                            >
-                              <Edit2 size={16} />
-                            </button>
-
-                            <button
-                              onClick={() => handleDelete(user.id_user)}
-                              className="p-2 bg-gray-700 hover:bg-gray-900 text-white rounded-lg transition-all"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                          <div className="flex justify-center">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button className="hover:bg-sidebar-hover rounded-md p-1">
+                                  <EllipsisVertical />
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-40 p-2">
+                                <div
+                                  className="flex flex-col space-y-1 bg-sidebar shadow-xl border-border border-1 rounded-md p-2"
+                                >
+                                  <button className="px-3 py-2 text-red-500 rounded-md hover:bg-sidebar-hover text-sm text-left w-full">Hapus</button>
+                                  <button className="px-3 py-2 rounded-md hover:bg-sidebar-hover text-sm text-left w-full">
+                                    Reset password
+                                  </button>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
                           </div>
                         </td>
                       </tr>
@@ -328,8 +339,7 @@ export default function Users() {
           <div className="mt-6 flex items-center justify-between bg-white rounded-xl border-2 border-gray-300 p-4">
             <div className="text-sm text-gray-600">
               Menampilkan {data.limit * (data.page - 1) + 1} -{" "}
-              {data.limit * data.page} dari {data.count /* total user */}{" "}
-              user
+              {data.limit * data.page} dari {data.count /* total user */} user
             </div>
 
             <div className="flex items-center gap-2">
