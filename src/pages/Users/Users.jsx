@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Plus,
   Edit2,
@@ -7,10 +7,46 @@ import {
   XCircle,
   ChevronLeft,
   ChevronRight,
+  RefreshCw,
 } from "lucide-react";
+import { apiGet } from "../../lib/api.js";
+import { GET_USERS } from "../../constants/api/user.js";
+import { useSearchParams } from "react-router-dom";
+import LoadingPage from "../Loading/loading.jsx";
 
 export default function Users() {
-  const columns = ["Nama", "Role", "Email", "Contact", "Aksi"];
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const columns = [
+    { name: "Name", className: "text-left" },
+    { name: "Role", className: "text-left" },
+    { name: "Email", className: "text-left" },
+    { name: "Kontak", className: "text-left" },
+    { name: "Aksi" },
+  ];
+
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const limit = parseInt(searchParams.get("limit") || "10", 10);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await apiGet(GET_USERS(currentPage, limit));
+      setData(result.data.result);
+    } catch (err) {
+      setError("Failed to fetch data: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, limit]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const [stokBarang, setStokBarang] = useState([
     {
@@ -63,7 +99,6 @@ export default function Users() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [formData, setFormData] = useState({
     nama: "",
@@ -73,33 +108,6 @@ export default function Users() {
     satuan: "",
     minimal: "",
   });
-
-  const getStatus = () => {
-    return {
-      label: "Habis",
-      color: "bg-red-500/20 text-red-600 border-red-500/30",
-      icon: XCircle,
-    };
-  };
-
-  const getStatsData = () => {
-    const tersedia = stokBarang.filter((item) => {
-      const status = getStatus(item.stok, item.minimal);
-      return status.label === "Tersedia";
-    }).length;
-
-    const perluRestock = stokBarang.filter((item) => {
-      const status = getStatus(item.stok, item.minimal);
-      return status.label === "Perlu Restock";
-    }).length;
-
-    const habis = stokBarang.filter((item) => {
-      const status = getStatus(item.stok, item.minimal);
-      return status.label === "Habis";
-    }).length;
-
-    return { tersedia, perluRestock, habis };
-  };
 
   const filteredStok = stokBarang.filter((item) => {
     const namaMatch = item.nama
@@ -113,11 +121,16 @@ export default function Users() {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredStok.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredStok.length / itemsPerPage);
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === currentPage) return;
+
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set("page", newPage.toString());
+      return newParams;
+    });
   };
 
   const handleSubmit = () => {
@@ -239,88 +252,93 @@ export default function Users() {
               className="w-full bg-white border-2 border-gray-300 rounded-lg pl-12 pr-4 py-2 md:py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-gray-800 transition-all"
             />
           </div>
+          <button
+            onClick={fetchData}
+            className="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg"
+          >
+            <RefreshCw size={20} />
+          </button>
 
           <button
             onClick={handleTambahBarang}
             className="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg"
           >
             <Plus size={20} />
-            Tambah Barang
+            Tambah User
           </button>
         </div>
 
         <div className="bg-white rounded-xl border-2 border-gray-300 overflow-hidden shadow-lg">
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gradient-to-r from-gray-800 to-black text-white">
-                <tr>
-                  {columns.map((column) => {
+            {loading ? (
+              <LoadingPage />
+            ) : (
+              <table className="w-full">
+                <thead className="bg-gradient-to-r from-gray-800 to-black text-white">
+                  <tr>
+                    {columns.map((column) => {
+                      return (
+                        <th
+                          className={`px-6 py-4 text-sm fmnt-semibold ${column.className}`}
+                        >
+                          {column.name}
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-gray-200">
+                  {data.data.map((user) => {
                     return (
-                      <th className="px-6 py-4 text-left text-sm fmnt-semibold">
-                        {column}
-                      </th>
+                      <tr
+                        key={user.id_user}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-gray-800">
+                            {user.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {user.username}
+                          </div>
+                        </td>
+
+                        <td className="px-6 py-4">
+                          <span className="px-3 py-1 bg-gray-200 text-gray-800 rounded-full text-sm font-medium">
+                            {user.role}
+                          </span>
+                        </td>
+
+                        { ["email", "contact"].map((field) => (
+                            <td className="px-6 py-4">
+                              {user[field] || "Tidak ada"}
+                            </td>
+                        ))}
+
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleEdit(user)}
+                              className="p-2 bg-gray-800 hover:bg-black text-white rounded-lg transition-all"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+
+                            <button
+                              onClick={() => handleDelete(user.id_user)}
+                              className="p-2 bg-gray-700 hover:bg-gray-900 text-white rounded-lg transition-all"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
                     );
                   })}
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-gray-200">
-                {currentItems.map((item) => {
-                  const status = getStatus(item.stok, item.minimal);
-                  const StatusIcon = status.icon;
-
-                  return (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-gray-800">
-                          {item.nama}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {item.satuan}
-                        </div>
-                      </td>
-
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 bg-gray-200 text-gray-800 rounded-full text-sm font-medium">
-                          {item.kategori}
-                        </span>
-                      </td>
-
-                      <td className="px-6 py-4 text-center">
-                        <span className="text-lg font-semibold text-gray-800">
-                          {item.stok}
-                        </span>
-                      </td>
-
-                      <td className="px-6 py-4 text-right font-medium text-gray-800">
-                        {formatRupiah(item.harga)}
-                      </td>
-
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => handleEdit(item)}
-                            className="p-2 bg-gray-800 hover:bg-black text-white rounded-lg transition-all"
-                          >
-                            <Edit2 size={16} />
-                          </button>
-
-                          <button
-                            onClick={() => handleDelete(item.id)}
-                            className="p-2 bg-gray-700 hover:bg-gray-900 text-white rounded-lg transition-all"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 
