@@ -4,88 +4,110 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Eye, EyeOff } from "lucide-react"
 import { apiPatch } from "@/lib/api";
-import { UPDATE_USER_PASSWORD } from "@/constants/api/user";
-import { ValidatePassword } from "./ValidatePassword";
+import { useAuth } from "@/contexts/AuthContext"
+import { UPDATE_USER_PASSWORD, UPDATE_USER } from "@/constants/api/user";
+import { ValidatePassword, ValidateUsername } from "./ValidatePassword";
 
-export default function AccountSettings({ user }) { // untuk mendapatkan data user saat ini
+export default function AccountSettings() {
+  const { userInfo: user } = useAuth()
   const [form, setForm] = useState({
     current_password: "",
     new_password: "",
     validate_password: "",
-  }) // state untuk menampung input password user
+  })
 
-  // State untuk loading dan pesan status
-  const [loading, setLoading] = useState(false) // indikator proses
-  const [message, setMessage] = useState("") // pesan sukses/gagal
-  const [errors, setErrors] = useState({}) // untuk menampung error hasil Yup validate
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState("")
+  const [errors, setErrors] = useState({})
 
-  // State untuk username
-  const [username, setUsername] = useState(user?.username ?? "") // state username awal
-  const [usernameMsg, setUsernameMsg] = useState("") // pesan status username
+  const [username, setUsername] = useState(user?.username ?? "")
+  const [usernameMsg, setUsernameMsg] = useState("")
 
-  // State untuk menampilkan/menyembunyikan password
   const [showPass, setShowPass] = useState({
     current: false,
     new: false,
     confirm: false,
-  }) // kontrol toggle icon Eye/EyeOff
+  })
 
-  // Handler untuk perubahan field password
-  const handleChange = (e) => { // update state form password
+  const handleChange = (e) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
     })
   }
 
-  // Handler untuk update username
+  // Handler untuk update username - MENGIKUTI PATTERN EditProfile
   const handleChangeUsername = async () => {
     setUsernameMsg("") // reset pesan
 
-    if (!username.trim()) { // validasi sederhana
-      return setUsernameMsg("Username tidak boleh kosong.")
-    }
-
     try {
+      // Validasi username dengan Yup
+      await ValidateUsername.validate({ username }, { abortEarly: false });
+
       setLoading(true) // mulai loading
-      setTimeout(() => { // mock API call
-        setLoading(false)
-        setUsernameMsg("Username berhasil diupdate! (mock)")
-      }, 700)
+
+      // Payload - hanya kirim username yang diubah (seperti pattern EditProfile)
+      const payload = {
+        username: username
+        // Tidak perlu kirim field lain yang tidak diubah
+      };
+
+      // Gunakan user.id_user seperti di EditProfile
+      const userId = user?.id_user;
+
+      if (!userId) {
+        throw new Error('User ID tidak ditemukan');
+      }
+
+      // Panggil API sama persis seperti di EditProfile
+      const res = await apiPatch(UPDATE_USER(userId), payload);
+
+      if (!res.error) {
+        setLoading(false);
+        setUsernameMsg("Username berhasil diupdate!");
+        return;
+      }
+
+      setLoading(false);
+      setUsernameMsg(res.message || "Gagal update username.");
 
     } catch (err) {
       setLoading(false)
-      setUsernameMsg("Gagal update username.")
+
+      // Error dari Yup untuk username
+      if (err.path === 'username') {
+        setUsernameMsg(err.message);
+      } else {
+        setUsernameMsg(err.message || "Gagal update username.");
+      }
     }
   }
 
-  // Handler untuk update password
+  // Handler untuk update password 
   const handleChangePassword = async () => {
     setMessage("") // reset pesan
     setErrors({}) // reset error (penting untuk Yup)
 
     try {
-      await ValidatePassword.validate(form, { abortEarly: false }) // validasi semua field sekaligus
+      await ValidatePassword.validate(form, { abortEarly: false })
 
-      setLoading(true) // mulai loading
+      setLoading(true)
 
-      // api call untuk update password
       const payload = {
         current_password: form.current_password,
         new_password: form.new_password,
         validate_password: form.validate_password,
       };
 
-      // Deklarasi userId
-      const userId = user?.id || user?.userInfo?.id_user || user?.user_id;
+      // Deklarasi userId - pakai id_user
+      const userId = user?.id_user;
 
-      // Jika UPDATE_USER_PASSWORD adalah string, gunakan langsung
-      // Jika adalah function, pastikan userId tersedia
+      if (!userId) {
+        throw new Error('User ID tidak ditemukan');
+      }
+
       let endpoint;
       if (typeof UPDATE_USER_PASSWORD === 'function') {
-        if (!userId) {
-          throw new Error('User ID tidak ditemukan');
-        }
         endpoint = UPDATE_USER_PASSWORD(userId);
       } else {
         endpoint = UPDATE_USER_PASSWORD;
@@ -106,7 +128,19 @@ export default function AccountSettings({ user }) { // untuk mendapatkan data us
       }
 
       setLoading(false);
-      setMessage(res.message || "Gagal update password.")
+
+      // Validasi current password salah
+      if (res.message?.toLowerCase().includes('current password') ||
+        res.message?.toLowerCase().includes('password saat ini') ||
+        res.message?.toLowerCase().includes('salah') ||
+        res.error === 'INVALID_CURRENT_PASSWORD' ||
+        res.status === 401) {
+        setErrors({
+          current_password: "Password saat ini tidak sesuai. Silakan cek kembali."
+        });
+      } else {
+        setMessage(res.message || "Gagal update password.");
+      }
 
     } catch (error) {
       setLoading(false)
@@ -120,7 +154,16 @@ export default function AccountSettings({ user }) { // untuk mendapatkan data us
         return
       }
 
-      setMessage(error.message || "Gagal update password.") // fallback error
+      // Validasi current password salah dari catch umum
+      if (error.message?.toLowerCase().includes('current password') ||
+        error.message?.toLowerCase().includes('password saat ini') ||
+        error.message?.toLowerCase().includes('salah')) {
+        setErrors({
+          current_password: "Password saat ini tidak sesuai"
+        });
+      } else {
+        setMessage(error.message || "Gagal update password.");
+      }
     }
   }
 
@@ -146,7 +189,11 @@ export default function AccountSettings({ user }) { // untuk mendapatkan data us
             {loading ? "Saving..." : "Update"}
           </Button>
         </div>
-        {usernameMsg && <p className="text-xs text-muted-foreground">{usernameMsg}</p>}
+        {usernameMsg && (
+          <p className={`text-xs ${usernameMsg.includes('berhasil') ? 'text-green-500' : 'text-red-500'}`}>
+            {usernameMsg}
+          </p>
+        )}
       </div>
 
       {/* Section Password */}
@@ -245,7 +292,9 @@ export default function AccountSettings({ user }) { // untuk mendapatkan data us
 
         {/* Pesan status setelah update password */}
         {message && (
-          <p className="text-xs text-muted-foreground">{message}</p>
+          <p className={`text-xs ${message.includes('berhasil') ? 'text-green-500' : 'text-red-500'}`}>
+            {message}
+          </p>
         )}
 
         {/* Tombol submit update password */}

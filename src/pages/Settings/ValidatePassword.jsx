@@ -1,7 +1,13 @@
-// src/pages/Settings/ValidatePassword.jsx
 import * as Yup from "yup";
 
-export const ValidatePassword = Yup.object().shape({
+export const ValidateUsername = Yup.object().shape({
+  username: Yup.string()
+    .required("Username tidak boleh kosong")
+    .min(3, "Username minimal 3 karakter")
+    .max(20, "Username maksimal 20 karakter")
+});
+
+export const ValidatePassword = Yup.object().shape({        
   current_password: Yup.string()
     .required("Password saat ini wajib diisi"),
 

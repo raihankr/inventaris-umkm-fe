@@ -9,6 +9,7 @@ import Transaksi from "@/pages/Transaksi/Transaksi";
 import Login from "@/pages/Login/login";
 import Users from "../pages/Users/Users.jsx";
 import {AuthProvider} from "@/contexts/AuthProvider";
+import NotFound from "@/pages/NotFound/NotFound";
 
 export default function AppRoutes() {
   return (
@@ -43,6 +44,9 @@ export default function AppRoutes() {
 
           {/* Login */}
           <Route path="/login" element={<Login />} />
+
+          {/* 404 Not Found */}
+          <Route path="*" element={<NotFound />} /> 
         </Routes>
       </AuthProvider>
     </Router>
