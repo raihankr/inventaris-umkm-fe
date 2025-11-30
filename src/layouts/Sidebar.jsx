@@ -42,12 +42,13 @@ import ProjectLogo from "@/assets/icons/academicons--open-data.svg?react";
 import DashboardLogo from "@/assets/icons/material-symbols--dashboard-outline-rounded.svg?react";
 import StokLogo from "@/assets/icons/game-icons--sell-card.svg?react";
 import TransaksiLogo from "@/assets/icons/fluent--money-16-filled.svg?react";
-import SettingsLogo from "@/assets/icons/material-symbols--settings.svg?react";
+import UserLogo from "@/assets/icons/mingcute--user-3-fill.svg?react";
 
 export default function AppSidebar() {
   const { open } = useSidebar(); // open close status sidebar
   const [showEditProfile, setShowEditProfile] = useState(false); // dialog edit profile
   const [showSettings, setShowSettings] = useState(false); // dialog settings
+  const { userInfo } = useAuth();
 
 
   // Daftar menu sidebar
@@ -57,8 +58,11 @@ export default function AppSidebar() {
     { icon: StokLogo, label: "Stok Barang", href: "/stok" },
   ];
 
+  if (userInfo.role === "admin")
+    menuItems.push(
+      { icon: UserLogo, label: "Manajemen User", href: "/users" },
+    );
   // Ambil data user dari context
-  const { userInfo } = useAuth();
   const user = userInfo || {
     username: "loading...",
     name: "Loading...",
@@ -69,7 +73,7 @@ export default function AppSidebar() {
 
   // Update data user setelah edit profile
   const handleUpdateProfile = (updatedUser) => {
-    setUser(updatedUser);
+    // setUser(updatedUser);
     setShowEditProfile(false);
   };
 
@@ -79,10 +83,10 @@ export default function AppSidebar() {
       <Sidebar collapsible="icon">
         {/* Header sidebar */}
         <SidebarHeader className="px-0 py-2 h-12 border-b ">
-          <div className="w-full px-4 flex items-center">
-            <Link to="/dashboard" className="flex items-center gap-3">
+          <div className={`w-full ${open ? "px-4 justify-start" : "px-2 justify-center"} flex items-center`}>
+            <Link to="/dashboard" className={`flex items-center ${open ? "gap-3" : "gap-0"}`}>
               <ProjectLogo className="h-6 w-6" />
-              <span className={`font-semibold text-base mt-1 transition-all duration-200 whitespace-nowrap ${open ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}>
+              <span className={`font-semibold text-base mt-1 transition-all duration-200 whitespace-nowrap overflow-hidden ${open ? "opacity-100 max-w-xs ml-2" : "opacity-0 max-w-0 w-0"}`}>
                 INVERTARIS UMKM
               </span>
             </Link>
@@ -93,7 +97,7 @@ export default function AppSidebar() {
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupContent>
-              <SidebarMenu className="py-0 gap-2">
+              <SidebarMenu className="py-0 gap-1">
                 {menuItems.map((item) => (
                   <SidebarMenuItem key={item.label}>
                     <NavLink to={item.href}>
@@ -103,13 +107,13 @@ export default function AppSidebar() {
                           tooltip={item.label}
                           data-active={isActive ? "true" : "false"}
                         >
-                          <div className="flex items-center rounded-md px-4 py-5">
+                          <div className={`flex items-center rounded-md transition-all duration-200 ${open ? "px-4 py-2 gap-3 justify-start" : "p-2 justify-center"}`}>
                             {typeof item.icon === "string" ? (
                               <item.icon className="h-5 w-5 icon text-foreground" />
                             ) : (
                               <item.icon size={20} />
                             )}
-                            <span className="text-base">{item.label}</span>
+                            {open && <span className="text-base">{item.label}</span>}
                           </div>
                         </SidebarMenuButton>
                       )}
@@ -124,12 +128,11 @@ export default function AppSidebar() {
         {/* Footer: profile + logout */}
         <SidebarFooter className="p-0 border-t">
           <div className="p-2">
-            <div className="flex items-center justify-between rounded-md px-2 py-2 transition-colors duration-200 hover:bg-sidebar-accent group">
-
+            <div className={`flex items-center rounded-md px-2 py-2 transition-colors duration-200 hover:bg-sidebar-accent group ${open ? "justify-between" : "justify-center"}`}>
               {/* Profile Section */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <button className="flex items-center gap-2 flex-1 text-left min-w-0">
+                  <button className={`flex items-center ${open ? "gap-2 flex-1 text-left min-w-0" : "justify-center w-full"}`}>
 
                     {/* Avatar*/}
                     <div className="flex-shrink-0">
@@ -160,7 +163,7 @@ export default function AppSidebar() {
               <div className={`transition-all duration-300 ${open ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className="p-1 rounded-md hover:bg-accent">
+                    <button className="p-1 rounded-md hover:bg-sidebar-hover">
                       <MoreVertical size={14} />
                     </button>
                   </PopoverTrigger>
@@ -216,7 +219,6 @@ export default function AppSidebar() {
           </DialogHeader>
 
           <EditProfile
-            user={userInfo}
             onUpdate={handleUpdateProfile}
             onClose={() => setShowEditProfile(false)}
           />

@@ -4,14 +4,17 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ValidateProfile } from "./ValidateProfile";
+import { apiPatch } from "@/lib/api";
+import { UPDATE_USER } from "@/constants/api/user";
+import { useAuth } from "@/contexts/AuthContext";
 
-export default function EditProfile({ user, onUpdate, onClose }) {
+export default function EditProfile({ onUpdate, onClose }) {
+  const { userInfo: user, refetchAuthStatus } = useAuth();
   // State buat handle semua logic form data
   const [name, setName] = useState(user.name || "");
-  const [username, setUsername] = useState(user.username || "");
   const [email, setEmail] = useState(user.email || "");
-  const [phone, setPhone] = useState(user.contact?.phone || "");
-  const [address, setAddress] = useState(user.contact?.address || "");
+  const [contact, setcontact] = useState(user.contact?.contact ?? "");
+  const [address, setAddress] = useState(user.contact?.address ?? "");
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(user.avatar || "");
 
@@ -34,20 +37,38 @@ export default function EditProfile({ user, onUpdate, onClose }) {
   const handleSave = async () => {
     const updatedUser = {
       name,
-      username,
       email,
-      phone,
+      contact,
       address,
       avatar: avatarPreview,
     };
 
     try {
-      // Reset error sebelum validasi ulang
-      setErrors({});
-      // Validasi form dengan Yup
-      await ValidateProfile.validate(updatedUser, { abortEarly: false });
-      // Jika valid, kirim data ke parent untuk disimpan / API call
-      if (onUpdate) onUpdate(updatedUser);
+
+      setErrors({}); // Reset error sebelum validasi ulang
+      await ValidateProfile.validate(updatedUser, { abortEarly: false }); // Validasi form dengan Yup
+
+      let payload; // payload adalah paket data berisi informasi user yang akan dikirim ke API
+      if (avatarFile) {
+        payload = new FormData();
+        payload.append("name", name);
+        payload.append("email", email);
+        payload.append("contact", contact);
+        payload.append("address", address);
+        payload.append("avatar", avatarFile);
+      } else {
+        payload = updatedUser;
+      }
+
+      const res = await apiPatch(UPDATE_USER(user.id_user), payload);
+
+      if (!res.error) {
+        if (onUpdate) onUpdate(res.data); // kalau sukses, panggil callback parent
+      } else {
+        setErrors({ form: res.message }); // handle error dari API
+      }
+      await refetchAuthStatus(); // Refresh data user di context setelah update
+
     } catch (err) {
       if (err.inner?.length > 0) {
         const fieldErrors = {};
@@ -59,6 +80,7 @@ export default function EditProfile({ user, onUpdate, onClose }) {
         // fallback async Yup error
         setErrors({ form: err.message });
       }
+      console.error("Validation or Save Error:", err);  
     }
   };
 
@@ -107,21 +129,6 @@ export default function EditProfile({ user, onUpdate, onClose }) {
           {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
         </div>
 
-        {/* Input field username */}
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="username">Username</Label>
-          <Input
-            id="username"
-            name="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter your username"
-          />
-          {errors.username && (
-            <p className="text-xs text-red-500">{errors.username}</p>
-          )}
-        </div>
-
         {/* Input field email */}
         <div className="flex flex-col gap-1">
           <Label htmlFor="email">Email</Label>
@@ -137,15 +144,15 @@ export default function EditProfile({ user, onUpdate, onClose }) {
 
         {/* Input field nomor telepon */}
         <div className="flex flex-col gap-1">
-          <Label htmlFor="phone">Contact Number</Label>
+          <Label htmlFor="contact">Contact Number</Label>
           <Input
-            id="phone"
-            name="phone"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            id="contact"
+            name="contact"
+            value={contact}
+            onChange={(e) => setcontact(e.target.value)}
             placeholder="e.g. +62 812 3456 7890"
           />
-          {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
+          {errors.contact && <p className="text-xs text-red-500">{errors.contact}</p>}
         </div>
 
         {/* Input field alamat */}

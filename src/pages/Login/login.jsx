@@ -41,7 +41,7 @@ export default function LoginPage() {
     try {
       const response = await apiPost("/auth/login", { username, password });
 
-      if (response.status != 200) {
+      if (response.status >= 500) {
         setErrorMessage("Username atau Password salah.");
         setLoading(false);
         return;
@@ -56,8 +56,23 @@ export default function LoginPage() {
     } catch (error) {
       console.error("Error:", error);
       setErrorMessage("Terjadi kesalahan server. Coba lagi nanti.");
+
       setLoading(false);
+      return;
     }
+
+    if (response.status == 400) {
+      setErrorMessage("Username atau Password salah.");
+      setLoading(false);
+      return;
+    }
+
+    setShowPopup(false);
+    window.history.replaceState({}, "");
+
+    refetchAuthStatus();
+
+    navigate("/dashboard");
   };
 
   return (
@@ -154,9 +169,7 @@ export default function LoginPage() {
             </div>
 
             {errorMessage && (
-              <p className="text-red-600 text-sm -mt-2">
-                {errorMessage}
-              </p>
+              <p className="text-red-600 text-sm -mt-2">{errorMessage}</p>
             )}
 
             <button

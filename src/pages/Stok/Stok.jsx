@@ -143,7 +143,11 @@ export default function StokUMKM() {
       {/* Mobile floating add button */}
       <button
         onClick={handleTambahBarang}
-        className="sm:hidden fixed bottom-5 right-5 bg-gray-900 hover:bg-black text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl z-50"
+        className={`sm:hidden fixed bottom-5 right-5 bg-gray-900 hover:bg-black text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl z-50
+                ${isDark
+                ? 'bg-gray-800 text-white hover:bg-white hover:text-black'
+                : 'bg-black text-white hover:bg-gray-900'
+                }`}
       >
         <Plus size={28} />
       </button>
@@ -218,16 +222,18 @@ export default function StokUMKM() {
 
           <button
             onClick={handleTambahBarang}
-            className="hidden sm:flex bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg"
+             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all
+              ${isDark
+                ? 'bg-gray-800 text-white hover:bg-white hover:text-black'
+                : 'bg-black text-white hover:bg-gray-900'
+              }`}
           >
             <Plus size={20} />
             Tambah Barang
           </button>
         </div>
 
-        {/* ============================
-             MOBILE LIST (visible on < sm)
-             ============================ */}
+{/* mobile list (card) */}
         <div className="sm:hidden space-y-3 mb-6">
           {currentItems.map(item => {
             const status = getStatus(item.stok, item.minimal);
@@ -278,17 +284,30 @@ export default function StokUMKM() {
             </div>
           )}
         </div>
-
-        {/* ============================
-             TABLE (visible on >= sm)
-             ============================ */}
+{/* Table visible */}
         <div className={`rounded-xl overflow-hidden border-2 transition-all hidden sm:block
           ${'bg-[--background] text-[--foreground]'}
         `}>
-
+        
+        <div
+          className={`rounded-xl overflow-hidden shadow-lg border-2 transition-all
+            ${isDark 
+              ? 'bg-gray-900 border-gray-700 text-gray-100' 
+              : 'bg-white border-gray-300 text-gray-800'
+            }
+          `}
+        >
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px]">
-              <thead className={`${isDark ? 'bg-gray-900 text-gray-100' : 'bg-gradient-to-r from-gray-800 to-black text-white'}`}>
+          
+              {/* HEADER */}
+              <thead
+                className={
+                  isDark
+                    ? 'bg-gray-800 text-gray-100'
+                    : 'bg-gradient-to-r from-gray-800 to-black text-white'
+                }
+              >
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-semibold">Nama Barang</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold">Kategori</th>
@@ -298,68 +317,121 @@ export default function StokUMKM() {
                   <th className="px-6 py-4 text-center text-sm font-semibold">Aksi</th>
                 </tr>
               </thead>
-
-              <tbody className={`divide-y transition-colors ${isDark ? 'divide-gray-700' : 'divide-gray-200'}`}>
+              
+              {/* BODY */}
+              <tbody
+                className={`divide-y transition-colors ${
+                  isDark ? 'divide-gray-700' : 'divide-gray-200'
+                }`}
+              >
                 {currentItems.map((item) => {
                   const status = getStatus(item.stok, item.minimal);
                   const StatusIcon = status.icon;
+                
                   return (
-                    <tr key={item.id} className={`${isDark ? 'hover:bg-gray-900/50' : 'hover:bg-gray-50'} transition-colors`}> 
+                    <tr
+                      key={item.id}
+                      className={`transition-colors ${
+                        isDark ? 'hover:bg-gray-800/60' : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      {/* NAMA BARANG */}
                       <td className="px-6 py-4">
-                        <div className={`font-medium ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>{item.nama}</div>
-                        <div className={`${isDark ? 'text-gray-400' : 'text-sm text-gray-500'}`}>{item.satuan}</div>
+                        <div className={`font-medium ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>
+                          {item.nama}
+                        </div>
+                    
+                        <div className={`${isDark ? 'text-gray-400' : 'text-sm text-gray-500'}`}>
+                          {item.satuan}
+                        </div>
                       </td>
-
+                    
+                      {/* KATEGORI */}
                       <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${isDark ? 'bg-gray-700/40 text-gray-200' : 'bg-gray-200 text-gray-800'}`}>
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            isDark ? 'bg-gray-700/60 text-gray-200' : 'bg-gray-200 text-gray-800'
+                          }`}
+                        >
                           {item.kategori}
                         </span>
                       </td>
-
+                        
+                      {/* STOK */}
                       <td className="px-6 py-4 text-center">
-                        <span className={`text-lg font-semibold ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>{item.stok}</span>
+                        <span
+                          className={`text-lg font-semibold ${isDark ? 'text-gray-100' : 'text-gray-800'}`}
+                        >
+                          {item.stok}
+                        </span>
                       </td>
-
+                        
+                      {/* HARGA */}
                       <td className="px-6 py-4 text-right font-medium">
                         {formatRupiah(item.harga)}
                       </td>
-
+                        
+                      {/* STATUS */}
                       <td className="px-6 py-4 text-center">
-                        <span className={`px-3 py-1 ${status.color} border rounded-full text-sm font-medium inline-flex items-center gap-1`}> 
+                        <span
+                          className={`px-3 py-1 rounded-full border inline-flex items-center gap-1 text-sm font-medium ${status.color}`}
+                        >
                           <StatusIcon size={14} /> {status.label}
                         </span>
                       </td>
-
+                        
+                      {/* AKSI */}
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
+                        
+                          {/* EDIT */}
                           <button
                             onClick={() => handleEdit(item)}
-                            className={`p-2 rounded-lg transition-all ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-800 hover:bg-black text-white'}`}>
+                            className={`p-2 rounded-lg transition-all ${
+                              isDark
+                                ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                                : 'bg-gray-800 hover:bg-black text-white'
+                            }`}
+                          >
                             <Edit2 size={16} />
                           </button>
-
+                          
+                          {/* DELETE */}
                           <button
                             onClick={() => handleDelete(item.id)}
-                            className={`p-2 rounded-lg transition-all ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-700 hover:bg-gray-800 text-white'}`}>
+                            className={`p-2 rounded-lg transition-all ${
+                              isDark
+                                ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                                : 'bg-gray-700 hover:bg-gray-800 text-white'
+                            }`}
+                          >
                             <Trash2 size={16} />
                           </button>
+                          
                         </div>
                       </td>
                     </tr>
                   );
                 })}
-
+        
+                {/* NO DATA */}
                 {currentItems.length === 0 && (
                   <tr>
-                    <td colSpan={6} className={`px-6 py-8 text-center ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <td
+                      colSpan={6}
+                      className={`px-6 py-8 text-center ${
+                        isDark ? 'text-gray-300' : 'text-gray-600'
+                      }`}
+                    >
                       Tidak ada barang yang ditemukan.
                     </td>
                   </tr>
                 )}
-
               </tbody>
             </table>
           </div>
+        </div>
+              
 
           {/* Pagination area */}
           {filteredStok.length > itemsPerPage && (

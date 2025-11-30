@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { apiGet } from "../lib/api.js";
 import { AuthContext } from "@/contexts/AuthContext.js";
+import {GET_USER_ME} from "@/constants/api/user.js";
 
 // Provider component
-
 export const AuthProvider = ({ children }) => {
   const [userInfo, setUserInfo] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await apiGet("/users/me");
+      const response = await apiGet(GET_USER_ME);
 
       if (response.status != 200) {
         // Handle non-2xx responses (e.g., 401 Unauthorized)

@@ -6,8 +6,8 @@ import axios from "axios"
   2. Axios instance pake cookie auth (withCredentials: true + otomatis cek cookienya)
   3. Interceptor handle 401, jadi bisa reload page otomatis
   4. List formatt respon error, status, data, message
-  5. List helper GET, POST, PUT, DELETE, fetchWithPagination
-  6. POST/PUT otomatis nge-cek FormData buat multipart
+  5. List helper GET, POST, Patch, DELETE, fetchWithPagination
+  6. POST/Patch otomatis nge-cek FormData buat multipart
 */
 
 // base URL api, otomatis nyesuain lokal - prdction
@@ -31,10 +31,8 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err?.response?.status === 401) {
-      if (!import.meta.env.VITE_ENV || import.meta.env.VITE_ENV === "production") {
-        if (window.location.pathname !== '/login')
+      if (window.location.pathname !== '/login')
         window.location.replace('/login');
-      }
     }
     return Promise.reject(err)
   }
@@ -80,12 +78,12 @@ export async function apiPost(path, payload, extraConfig = {}) {
   }
 }
 
-// PUT request, sama seperti POST
-export async function apiPut(path, payload, extraConfig = {}) {
+// Patch request, sama seperti POST
+export async function apiPatch(path, payload, extraConfig = {}) {
   try {
     const isForm = payload instanceof FormData
     const config = { ...(isForm ? { headers: { "Content-Type": "multipart/form-data" } } : {}), ...extraConfig }
-    const res = await api.put(path, payload, config)
+    const res = await api.patch(path, payload, config)
     return formatSuccess(res)
   } catch (err) {
     return formatError(err)
