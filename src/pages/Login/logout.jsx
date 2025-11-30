@@ -89,9 +89,9 @@ export default function Logout() {
           </AlertDialogCancel>
           <AlertDialogAction asChild>
             <Button
-              variant="destructive"
               onClick={handleConfirm}
               disabled={loading}
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               {loading ? "Logging out..." : "Yes, logout"}
             </Button>
