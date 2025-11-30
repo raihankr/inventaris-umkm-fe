@@ -4,8 +4,9 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 export default function Profile({ user, onEdit }) {
   // Mengamankan akses properti yang mungkin tidak ada
   // Misalnya, kalo user.contact atau user.address tidak ada
-  const phone = user.phone || user.contact?.phone || '';
-  const address = user.address || user.contact?.address || '';
+  const phone = user.contact || user.phone || '';
+  const address = user.address || '';
+
 
   return (
     <div className="flex flex-col items-center gap-3">

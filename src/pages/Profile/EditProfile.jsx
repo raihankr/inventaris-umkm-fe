@@ -13,8 +13,8 @@ export default function EditProfile({ onUpdate, onClose }) {
   // State buat handle semua logic form data
   const [name, setName] = useState(user.name || "");
   const [email, setEmail] = useState(user.email || "");
-  const [contact, setcontact] = useState(user.contact?.contact ?? "");
-  const [address, setAddress] = useState(user.contact?.address ?? "");
+  const [contact, setcontact] = useState(user.contact ?? "");
+  const [address, setAddress] = useState(user.address ?? "");
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(user.avatar || "");
 
@@ -40,7 +40,7 @@ export default function EditProfile({ onUpdate, onClose }) {
       email,
       contact,
       address,
-      avatar: avatarPreview,
+      avatar: user.avatar,
     };
 
     try {
@@ -80,7 +80,7 @@ export default function EditProfile({ onUpdate, onClose }) {
         // fallback async Yup error
         setErrors({ form: err.message });
       }
-      console.error("Validation or Save Error:", err);  
+      console.error("Validation or Save Error:", err);
     }
   };
 
