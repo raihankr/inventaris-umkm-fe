@@ -46,7 +46,7 @@ import TransaksiLogo from "@/assets/icons/fluent--money-16-filled.svg?react";
 import UserLogo from "@/assets/icons/mingcute--user-3-fill.svg?react";
 
 export default function AppSidebar() {
-  const { open } = useSidebar(); // open close status sidebar
+  const { open, isMobile, setOpenMobile } = useSidebar(); // open close status sidebar
   const [showEditProfile, setShowEditProfile] = useState(false); // dialog edit profile
   const [showSettings, setShowSettings] = useState(false); // dialog settings
   const { userInfo } = useAuth();
@@ -85,7 +85,7 @@ export default function AppSidebar() {
         {/* Header sidebar */}
         <SidebarHeader className="px-0 py-2 h-12 border-b ">
           <div className={`w-full ${open ? "px-4 justify-start" : "px-2 justify-center"} flex items-center`}>
-            <Link to="/dashboard" className={`flex items-center ${open ? "gap-3" : "gap-0"}`}>
+            <Link to="/dashboard" className={`flex items-center ${open ? "gap-3" : "gap-0"}`} onClick={() => isMobile && setOpenMobile(false)}>
               <img src={ProjectLogo} className="h-6 w-6" />
               <span className={`font-semibold text-base mt-1 transition-all duration-200 whitespace-nowrap overflow-hidden ${open ? "opacity-100 max-w-xs ml-2" : "opacity-0 max-w-0 w-0"}`}>
                 FaStock
@@ -101,7 +101,7 @@ export default function AppSidebar() {
               <SidebarMenu className="py-0 gap-1">
                 {menuItems.map((item) => (
                   <SidebarMenuItem key={item.label}>
-                    <NavLink to={item.href}>
+                    <NavLink to={item.href} onClick={() => isMobile && setOpenMobile(false)}>
                       {({ isActive }) => (
                         <SidebarMenuButton
                           asChild

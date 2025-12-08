@@ -1,10 +1,13 @@
+import { useState } from "react";
+import { XIcon } from "lucide-react";
+
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 import {
   Table,
@@ -13,15 +16,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
-import { Button } from "@/components/ui/button"
-
+import { Button } from "@/components/ui/button";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogOverlay,
+} from "@/components/ui/dialog";
 
 // Dummy
 const transaksiTerbaru = [
@@ -61,12 +68,14 @@ const transaksiTerbaru = [
       { nama: "Kopi Bubuk", harga: 11000 },
     ],
   },
-]
+];
 
 //  widget
 export default function WidgetTransaksiTerbaru() {
+  const [selected, setSelected] = useState(null);
+
   return (
-    <Card className="h-full">
+    <Card className="h-full w-full flex flex-col">
       <CardHeader>
         <CardTitle>Transaksi Terbaru</CardTitle>
         <CardDescription>
@@ -102,40 +111,13 @@ export default function WidgetTransaksiTerbaru() {
                   </TableCell>
 
                   <TableCell className="text-center w-[120px]">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button size="sm" variant="outline">
-                          Detail
-                        </Button>
-                      </PopoverTrigger>
-
-                      <PopoverContent className="w-64">
-                        <div className="space-y-2">
-                          <p className="font-semibold">Detail Belanja</p>
-
-                          <div className="space-y-1">
-                            {trx.items.map((item, index) => (
-                              <div
-                                key={index}
-                                className="flex justify-between text-sm"
-                              >
-                                <span>{item.nama}</span>
-                                <span>
-                                  Rp {item.harga.toLocaleString("id-ID")}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-
-                          <div className="border-t pt-2 text-sm font-semibold flex justify-between">
-                            <span>Total</span>
-                            <span>
-                              Rp {trx.total.toLocaleString("id-ID")}
-                            </span>
-                          </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSelected(trx)}
+                    >
+                      Detail
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -143,6 +125,66 @@ export default function WidgetTransaksiTerbaru() {
           </Table>
         </div>
       </CardContent>
+
+      {/* Dialog for transaction detail */}
+      <Dialog
+        open={!!selected}
+        onOpenChange={(open) => {
+          if (!open) setSelected(null);
+        }}
+      >
+        <DialogOverlay className="bg-black/50 backdrop-blur-sm" />
+        <DialogContent
+          showCloseButton={false}
+          onInteractOutside={(e) => e.preventDefault()}
+          className="sm:max-w-[520px]"
+        >
+          <DialogHeader>
+            <DialogTitle>Detail Transaksi</DialogTitle>
+            <DialogDescription>
+              Rincian pembelian {selected?.id}
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* custom top-right close using project Button */}
+          <DialogClose asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="absolute top-4 right-4 hover:bg-transparent hover:text-current focus-visible:ring-0 active:bg-transparent shadow-none"
+            >
+              <XIcon />
+            </Button>
+          </DialogClose>
+
+          {selected && (
+            <div className="space-y-3">
+              <div className="space-y-1">
+                {selected.items.map((item, i) => (
+                  <div key={i} className="flex justify-between text-sm">
+                    <span>{item.nama}</span>
+                    <span>Rp {item.harga.toLocaleString("id-ID")}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t pt-2 text-sm font-semibold flex justify-between">
+                <span>Total</span>
+                <span>Rp {selected.total.toLocaleString("id-ID")}</span>
+              </div>
+
+              {/* footer with close button (left aligned) */}
+              <DialogFooter>
+                <div className="flex justify-between mt-4 sticky bottom-0 bg-background py-2 border-t">
+                  <Button variant="outline" onClick={() => setSelected(null)}>
+                    Tutup
+                  </Button>
+                </div>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
-  )
+  );
 }
