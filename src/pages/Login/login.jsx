@@ -4,7 +4,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { apiPost } from "../../lib/api.js";
 import { useAuth } from "../../contexts/AuthContext.js";
 import LoadingPage from "../Loading/loading.jsx";
-import { useTheme } from "../../contexts/ThemeContext.jsx"; // ⬅️ add this
+import { useTheme } from "../../contexts/ThemeContext.jsx";
+import LoginImage from "@/assets/image/login-image.jpg";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -175,7 +176,7 @@ export default function LoginPage() {
       <div
         className="hidden md:flex flex-1 items-center justify-center relative"
         style={{
-          backgroundImage: "url('/src/assets/image/login-image.jpg')",
+          backgroundImage: `url(${LoginImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           filter: "grayscale(100%)",
