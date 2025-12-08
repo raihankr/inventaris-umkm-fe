@@ -3,29 +3,32 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Eye, EyeOff } from "lucide-react"
+import { apiPatch } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext"
+import { UPDATE_USER_PASSWORD, UPDATE_USER } from "@/constants/api/user";
+import { ValidatePassword, ValidateUsername } from "./ValidatePassword";
 
-export default function AccountSettings({ user }) { // <-- tambahkan props user
+export default function AccountSettings() {
+  const { userInfo: user } = useAuth()
   const [form, setForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    current_password: "",
+    new_password: "",
+    validate_password: "",
   })
 
-  // State untuk loading dan pesan status
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
+  const [errors, setErrors] = useState({})
 
-  const [username, setUsername] = useState(user?.username || "")
+  const [username, setUsername] = useState(user?.username ?? "")
   const [usernameMsg, setUsernameMsg] = useState("")
 
-  // State untuk menampilkan/menyembunyikan password
   const [showPass, setShowPass] = useState({
     current: false,
     new: false,
     confirm: false,
   })
 
-  // Handler untuk perubahan field password
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -33,84 +36,164 @@ export default function AccountSettings({ user }) { // <-- tambahkan props user
     })
   }
 
-  // Handler untuk update username
+  // Handler untuk update username - MENGIKUTI PATTERN EditProfile
   const handleChangeUsername = async () => {
-    setUsernameMsg("")
-
-    if (!username.trim()) {
-      return setUsernameMsg("Username tidak boleh kosong.")
-    }
+    setUsernameMsg("") // reset pesan
 
     try {
-      setLoading(true)
+      // Validasi username dengan Yup
+      await ValidateUsername.validate({ username }, { abortEarly: false });
 
-      // Contoh API:
-      // await api.patch("/users/me", { username })
+      setLoading(true) // mulai loading
 
-      setTimeout(() => {
-        setLoading(false)
-        setUsernameMsg("Username berhasil diupdate! (mock)")
-      }, 700)
+      // Payload - hanya kirim username yang diubah (seperti pattern EditProfile)
+      const payload = {
+        username: username
+        // Tidak perlu kirim field lain yang tidak diubah
+      };
+
+      // Gunakan user.id_user seperti di EditProfile
+      const userId = user?.id_user;
+
+      if (!userId) {
+        throw new Error('User ID tidak ditemukan');
+      }
+
+      // Panggil API sama persis seperti di EditProfile
+      const res = await apiPatch(UPDATE_USER(userId), payload);
+
+      if (!res.error) {
+        setLoading(false);
+        setUsernameMsg("Username berhasil diupdate!");
+        return;
+      }
+
+      setLoading(false);
+      setUsernameMsg(res.message || "Gagal update username.");
 
     } catch (err) {
       setLoading(false)
-      setUsernameMsg("Gagal update username.")
+
+      // Error dari Yup untuk username
+      if (err.path === 'username') {
+        setUsernameMsg(err.message);
+      } else {
+        setUsernameMsg(err.message || "Gagal update username.");
+      }
     }
   }
 
-  // Handler untuk update password
+  // Handler untuk update password 
   const handleChangePassword = async () => {
-    setMessage("")
-
-    if (!form.currentPassword || !form.newPassword || !form.confirmPassword) {
-      return setMessage("Semua field harus diisi.")
-    }
-
-    if (form.newPassword !== form.confirmPassword) {
-      return setMessage("Password baru tidak sama.")
-    }
+    setMessage("") // reset pesan
+    setErrors({}) // reset error (penting untuk Yup)
 
     try {
+      await ValidatePassword.validate(form, { abortEarly: false })
+
       setLoading(true)
 
-      // API call seharusnya ditaruh di sini
-      // const res = await api.patch("/users/change-password", form)
+      const payload = {
+        current_password: form.current_password,
+        new_password: form.new_password,
+        validate_password: form.validate_password,
+      };
 
-      // Mock success
-      setTimeout(() => {
-        setLoading(false)
-        setMessage("Password berhasil diupdate! (mock)")
-      }, 800)
+      // Deklarasi userId - pakai id_user
+      const userId = user?.id_user;
+
+      if (!userId) {
+        throw new Error('User ID tidak ditemukan');
+      }
+
+      let endpoint;
+      if (typeof UPDATE_USER_PASSWORD === 'function') {
+        endpoint = UPDATE_USER_PASSWORD(userId);
+      } else {
+        endpoint = UPDATE_USER_PASSWORD;
+      }
+
+      const res = await apiPatch(endpoint, payload); // panggil API
+
+      if (!res.error) {
+        setLoading(false);
+        setMessage("Password berhasil diupdate!");
+        // Reset form setelah sukses
+        setForm({
+          current_password: "",
+          new_password: "",
+          validate_password: "",
+        });
+        return;
+      }
+
+      setLoading(false);
+
+      // Validasi current password salah
+      if (res.message?.toLowerCase().includes('current password') ||
+        res.message?.toLowerCase().includes('password saat ini') ||
+        res.message?.toLowerCase().includes('salah') ||
+        res.error === 'INVALID_CURRENT_PASSWORD' ||
+        res.status === 401) {
+        setErrors({
+          current_password: "Password saat ini tidak sesuai. Silakan cek kembali."
+        });
+      } else {
+        setMessage(res.message || "Gagal update password.");
+      }
 
     } catch (error) {
       setLoading(false)
-      setMessage("Gagal update password.")
+
+      if (error.inner?.length > 0) { // jika error dari Yup
+        const fieldErrors = {} // tampung error per-field
+        error.inner.forEach((e) => {
+          fieldErrors[e.path] = e.message
+        })
+        setErrors(fieldErrors) // tampilkan error ke UI
+        return
+      }
+
+      // Validasi current password salah dari catch umum
+      if (error.message?.toLowerCase().includes('current password') ||
+        error.message?.toLowerCase().includes('password saat ini') ||
+        error.message?.toLowerCase().includes('salah')) {
+        setErrors({
+          current_password: "Password saat ini tidak sesuai"
+        });
+      } else {
+        setMessage(error.message || "Gagal update password.");
+      }
     }
   }
 
   return (
     <div className="flex flex-col gap-4" autoComplete="off">
 
-      {/* Bagian untuk mengganti username */}
+      {/* Section untuk update username user */}
       <div className="flex flex-col gap-2 mb-3">
         <h3 className="text-lg font-medium">Username</h3>
-        <div className="flex items-center gap-4">
-          <Label htmlFor="currentPassword" className="w-48">Current Password</Label>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+          <Label htmlFor="username" className="sm:w-48 w-full">New Username</Label>
           <Input
             id="username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Masukkan Username Baru"
+            onChange={(e) => setUsername(e.target.value)} // update username state
+            placeholder="Username Baru"
             className="flex-1"
           />
           <Button
-            disabled={loading}
-            onClick={handleChangeUsername}
+            disabled={loading} // disable ketika proses berlangsung
+            onClick={handleChangeUsername} // handler update
           >
             {loading ? "Saving..." : "Update"}
           </Button>
         </div>
-        {usernameMsg && <p className="text-xs text-muted-foreground">{usernameMsg}</p>}
+        {usernameMsg && (
+          <p className={`text-xs ${usernameMsg.includes('berhasil') ? 'text-green-500' : 'text-red-500'}`}>
+            {usernameMsg}
+          </p>
+        )}
       </div>
 
       {/* Section Password */}
@@ -118,23 +201,23 @@ export default function AccountSettings({ user }) { // <-- tambahkan props user
         <h3 className="text-lg font-medium">Password</h3>
 
         {/* Current Password */}
-        <div className="flex items-center gap-4">
-          <Label htmlFor="currentPassword" className="w-48">Current Password</Label>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+          <Label htmlFor="current_password" className="sm:w-48 w-full">Current Password</Label>
           <div className="relative flex-1">
             <Input
-              id="currentPassword"
-              type={showPass.current ? "text" : "password"}
-              name="currentPassword"
-              value={form.currentPassword}
-              onChange={handleChange}
-              placeholder="Masukkan Password Saat Ini"
+              id="current_password"
+              type={showPass.current ? "text" : "password"} // toggle lihat/sembunyikan password
+              name="current_password"
+              value={form.current_password}
+              onChange={handleChange} // handler input
+              placeholder="Password Saat Ini"
               autoComplete="off"
             />
             <button
               type="button"
               className="absolute right-3 top-1/2 -translate-y-1/2"
               onClick={() =>
-                setShowPass({ ...showPass, current: !showPass.current })
+                setShowPass({ ...showPass, current: !showPass.current }) // toggle icon eye
               }
             >
               {showPass.current ? (
@@ -145,25 +228,26 @@ export default function AccountSettings({ user }) { // <-- tambahkan props user
             </button>
           </div>
         </div>
+        {errors.current_password && <p className="text-xs text-red-500">{errors.current_password}</p>} {/* error dari Yup */}
 
         {/* New Password */}
-        <div className="flex items-center gap-4">
-          <Label htmlFor="newPassword" className="w-48">New Password</Label>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+          <Label htmlFor="new_password" className="sm:w-48 w-full">New Password</Label>
           <div className="relative flex-1">
             <Input
-              id="newPassword"
+              id="new_password"
               type={showPass.new ? "text" : "password"}
-              name="newPassword"
-              value={form.newPassword}
+              name="new_password"
+              value={form.new_password}
               onChange={handleChange}
-              placeholder="Masukkan Password Baru"
+              placeholder="Password Baru"
               autoComplete="new-password"
             />
             <button
               type="button"
               className="absolute right-3 top-1/2 -translate-y-1/2"
               onClick={() =>
-                setShowPass({ ...showPass, new: !showPass.new })
+                setShowPass({ ...showPass, new: !showPass.new }) // toggle lihat/sembunyi
               }
             >
               {showPass.new ? (
@@ -174,16 +258,17 @@ export default function AccountSettings({ user }) { // <-- tambahkan props user
             </button>
           </div>
         </div>
+        {errors.new_password && <p className="text-xs text-red-500">{errors.new_password}</p>} {/* error dari Yup */}
 
         {/* Confirm New Password */}
-        <div className="flex items-center gap-4">
-          <Label htmlFor="confirmPassword" className="w-48">Confirm New Password</Label>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+          <Label htmlFor="validate_password" className="sm:w-48 w-full">Confirm New Password</Label>
           <div className="relative flex-1">
             <Input
-              id="confirmPassword"
+              id="validate_password"
               type={showPass.confirm ? "text" : "password"}
-              name="confirmPassword"
-              value={form.confirmPassword}
+              name="validate_password"
+              value={form.validate_password}
               onChange={handleChange}
               placeholder="Konfirmasi Password Baru"
               autoComplete="new-password"
@@ -192,7 +277,7 @@ export default function AccountSettings({ user }) { // <-- tambahkan props user
               type="button"
               className="absolute right-3 top-1/2 -translate-y-1/2"
               onClick={() =>
-                setShowPass({ ...showPass, confirm: !showPass.confirm })
+                setShowPass({ ...showPass, confirm: !showPass.confirm }) // toggle icon
               }
             >
               {showPass.confirm ? (
@@ -203,17 +288,20 @@ export default function AccountSettings({ user }) { // <-- tambahkan props user
             </button>
           </div>
         </div>
+        {errors.validate_password && <p className="text-xs text-red-500">{errors.validate_password}</p>} {/* error dari Yup */}
 
         {/* Pesan status setelah update password */}
         {message && (
-          <p className="text-xs text-muted-foreground">{message}</p>
+          <p className={`text-xs ${message.includes('berhasil') ? 'text-green-500' : 'text-red-500'}`}>
+            {message}
+          </p>
         )}
 
         {/* Tombol submit update password */}
         <Button
           className="w-fit mt-3"
           disabled={loading}
-          onClick={handleChangePassword}
+          onClick={handleChangePassword} // trigger validate + update
         >
           {loading ? "Saving..." : "Update Password"}
         </Button>

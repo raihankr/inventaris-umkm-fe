@@ -1,4 +1,3 @@
-import { Contact } from "lucide-react";
 import * as Yup from "yup";
 
 export const ValidateProfile = Yup.object().shape({

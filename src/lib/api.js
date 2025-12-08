@@ -1,4 +1,5 @@
 import axios from "axios"
+import {useAuth} from "../contexts/AuthContext.js";
 
 /*
   Notes:
@@ -27,16 +28,15 @@ const api = axios.create({
 })
 
 // intercept response, kalo 401 langsung reload page
-api.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err?.response?.status === 401) {
-      if (window.location.pathname !== '/login')
-        window.location.replace('/login');
-    }
-    return Promise.reject(err)
-  }
-)
+// api.interceptors.response.use(
+//   (res) => res,
+//   (err) => {
+//     if (err?.response?.status === 401)
+//
+//
+//     return Promise.reject(err)
+//   }
+// )
 
 // helper format error, biar konsisten
 function formatError(err) {

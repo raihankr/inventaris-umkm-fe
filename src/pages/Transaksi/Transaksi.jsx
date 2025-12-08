@@ -18,6 +18,7 @@ export default function TransaksiUMKM() {
   const [showModal, setShowModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
   const [formData, setFormData] = useState({
     tanggal: '',
     jenis: 'Masuk',
@@ -30,11 +31,11 @@ export default function TransaksiUMKM() {
   const getStatsData = () => {
     const transaksiMasuk = transaksiList.filter(item => item.jenis === 'Masuk');
     const transaksiKeluar = transaksiList.filter(item => item.jenis === 'Keluar');
-
+    
     const totalMasuk = transaksiMasuk.reduce((sum, item) => sum + item.total, 0);
     const totalKeluar = transaksiKeluar.reduce((sum, item) => sum + item.total, 0);
     const profit = totalKeluar - totalMasuk;
-
+    
     return {
       jumlahMasuk: transaksiMasuk.length,
       jumlahKeluar: transaksiKeluar.length,
@@ -47,7 +48,10 @@ export default function TransaksiUMKM() {
   const stats = getStatsData();
 
   const filteredTransaksi = transaksiList.filter(item => {
-    const matchSearch = item.barang.toLowerCase().includes(searchTerm.toLowerCase()) || item.keterangan.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchSearch =
+      item.barang.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.keterangan.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchFilter = filterJenis === 'Semua' || item.jenis === filterJenis;
     return matchSearch && matchFilter;
   });
@@ -63,13 +67,14 @@ export default function TransaksiUMKM() {
   };
 
   const handleSubmit = () => {
-    if (!formData.tanggal || !formData.jenis || !formData.barang || formData.jumlah === '' || !formData.harga) {
+    if (!formData.tanggal || !formData.jenis || !formData.barang || 
+        formData.jumlah === '' || !formData.harga) {
       alert('Mohon lengkapi semua field yang wajib diisi');
       return;
     }
 
     const total = parseInt(formData.jumlah) * parseInt(formData.harga);
-
+    
     const newItem = {
       ...formData,
       id: Date.now(),
@@ -77,26 +82,47 @@ export default function TransaksiUMKM() {
       jumlah: parseInt(formData.jumlah),
       harga: parseInt(formData.harga)
     };
-
     setTransaksiList([...transaksiList, newItem]);
-
+    
     setShowModal(false);
-    setFormData({ tanggal: '', jenis: 'Masuk', barang: '', jumlah: '', harga: '', keterangan: '' });
+    setFormData({
+      tanggal: '',
+      jenis: 'Masuk',
+      barang: '',
+      jumlah: '',
+      harga: '',
+      keterangan: ''
+    });
   };
 
   const formatRupiah = (angka) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+    return new Intl.NumberFormat('id-ID', { 
+      style: 'currency', 
+      currency: 'IDR', 
+      minimumFractionDigits: 0 
+    }).format(angka);
   };
 
   const formatTanggal = (tanggal) => {
     const date = new Date(tanggal);
-    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    return date.toLocaleDateString('id-ID', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    });
   };
 
   const handleTambahTransaksi = () => {
     setShowModal(true);
     const today = new Date().toISOString().split('T')[0];
-    setFormData({ tanggal: today, jenis: 'Masuk', barang: '', jumlah: '', harga: '', keterangan: '' });
+    setFormData({
+      tanggal: today,
+      jenis: 'Masuk',
+      barang: '',
+      jumlah: '',
+      harga: '',
+      keterangan: ''
+    });
   };
 
   // helper class yg bakal ke pake
@@ -158,8 +184,8 @@ export default function TransaksiUMKM() {
         <div className={`${isDark ? 'bg-gradient-to-r from-slate-800 to-slate-900' : 'bg-gradient-to-r from-gray-800 to-black'} rounded-xl p-6 mb-6 text-white shadow-lg`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-300 text-sm mb-1">Keuntungan Bersih</p>
-              <p className="text-3xl font-bold">{formatRupiah(stats.profit)}</p>
+              <p className="text-gray-300 text-xs sm:text-sm mb-1">Keuntungan Bersih</p>
+              <p className="text-2xl sm:text-3xl font-bold">{formatRupiah(Math.abs(stats.profit))}</p>
             </div>
           </div>
         </div>
@@ -355,7 +381,7 @@ export default function TransaksiUMKM() {
                 disabled={currentPage === 1}
                 className={`p-2 rounded-lg transition-all ${currentPage === 1 ? 'bg-slate-600/40 text-slate-400 cursor-not-allowed' : (isDark ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-gray-800 text-white hover:bg-black')}`}
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={18} />
               </button>
 
               <div className="flex gap-1 overflow-x-auto">
@@ -378,7 +404,7 @@ export default function TransaksiUMKM() {
                 disabled={currentPage === totalPages}
                 className={`p-2 rounded-lg transition-all ${currentPage === totalPages ? 'bg-slate-600/40 text-slate-400 cursor-not-allowed' : (isDark ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-gray-800 text-white hover:bg-black')}`}
               >
-                <ChevronRight size={20} />
+                <ChevronRight size={18} />
               </button>
             </div>
           </div>
