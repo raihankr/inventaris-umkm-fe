@@ -184,7 +184,7 @@ export default function LoginPage() {
         `}
       >
         <div className="max-w-md">
-          <h2 className="text-4xl font-bold mb-4">Inventaris UMKM</h2>
+          <h2 className="text-4xl font-bold mb-4">FaStock</h2>
           <p className="text-lg opacity-90">
             Sistem inventaris sederhana untuk membantu UMKM mengelola barang,
             stok, dan aset usaha dengan mudah dan efisien.

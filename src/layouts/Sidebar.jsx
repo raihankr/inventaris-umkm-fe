@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogOverlay,
 } from "@/components/ui/dialog";
 
 import {
@@ -38,7 +39,7 @@ import Logout from "@/pages/Login/logout.jsx";
 import Settings from "@/pages/Settings/Settings";
 import { Button } from "@/components/ui/button";
 
-import ProjectLogo from "@/assets/icons/academicons--open-data.svg?react";
+import ProjectLogo from "@/assets/icons/company-logo/FaStock.png";
 import DashboardLogo from "@/assets/icons/material-symbols--dashboard-outline-rounded.svg?react";
 import StokLogo from "@/assets/icons/game-icons--sell-card.svg?react";
 import TransaksiLogo from "@/assets/icons/fluent--money-16-filled.svg?react";
@@ -85,9 +86,9 @@ export default function AppSidebar() {
         <SidebarHeader className="px-0 py-2 h-12 border-b ">
           <div className={`w-full ${open ? "px-4 justify-start" : "px-2 justify-center"} flex items-center`}>
             <Link to="/dashboard" className={`flex items-center ${open ? "gap-3" : "gap-0"}`}>
-              <ProjectLogo className="h-6 w-6" />
+              <img src={ProjectLogo} className="h-6 w-6" />
               <span className={`font-semibold text-base mt-1 transition-all duration-200 whitespace-nowrap overflow-hidden ${open ? "opacity-100 max-w-xs ml-2" : "opacity-0 max-w-0 w-0"}`}>
-                INVERTARIS UMKM
+                FaStock
               </span>
             </Link>
           </div>
@@ -154,7 +155,7 @@ export default function AppSidebar() {
                 <PopoverContent className="w-56 p-4 ml-3">
                   <Profile
                     user={userInfo}
-                    onEdit={() => setShowEditProfile(true)}
+                    onEdit={() => setShowEditProfile(true)} // Buka dialog edit profile
                   />
                 </PopoverContent>
               </Popover>
@@ -206,10 +207,13 @@ export default function AppSidebar() {
 
       {/* Dialog edit profile */}
       <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
+
+        <DialogOverlay className="bg-black/50 backdrop-blur-sm" />
+
         <DialogContent
           className="sm:max-w-[425px]"
           onInteractOutside={(e) => e.preventDefault()}
-          onEscapeKeyDown={(e) => e.preventDefault()} // biar tombol ESC tidak close
+          onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <DialogHeader>
             <DialogTitle>Edit Profile</DialogTitle>
@@ -227,11 +231,15 @@ export default function AppSidebar() {
 
       {/* Dialog settings */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
+
+        <DialogOverlay className="bg-black/50 backdrop-blur-sm" />
+
         <DialogContent
           className="sm:max-w-[600px]"
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
+
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
             <DialogDescription>

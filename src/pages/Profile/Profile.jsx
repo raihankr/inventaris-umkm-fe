@@ -1,7 +1,7 @@
 import React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
-export default function Profile({ user, onEdit }) {
+export default function Profile({ user, onEdit }) { // Menerima props user dan onEdit dari parent
   // Mengamankan akses properti yang mungkin tidak ada
   // Misalnya, kalo user.contact atau user.address tidak ada
   const phone = user.contact || user.phone || '';
