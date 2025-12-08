@@ -41,6 +41,7 @@ export default function NotFound() {
 
       <Link
         to="/"
+        replace
         className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/80 transition"
       >
         Kembali ke Dashboard

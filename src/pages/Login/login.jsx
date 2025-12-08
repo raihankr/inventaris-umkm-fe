@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { apiPost } from "../../lib/api.js";
 import { useAuth } from "../../contexts/AuthContext.js";
 import LoadingPage from "../Loading/loading.jsx";
-import { useTheme } from "../../contexts/ThemeContext.jsx";   // ⬅️ add this
+import { useTheme } from "../../contexts/ThemeContext.jsx"; // ⬅️ add this
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -26,12 +26,10 @@ export default function LoginPage() {
     if (message) setShowPopup(true);
   }, [message]);
 
-  if (isAuthenticated && !isLoading)
-    return navigate("/dashboard", { replace: true });
-
-  if (isLoading) {
-    return <LoadingPage />;
-  }
+  // useEffect(() => {
+  //   if (isAuthenticated && !isLoading)
+  //     navigate("/dashboard", { replace: true });
+  // }, [isAuthenticated, isLoading, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,6 +58,10 @@ export default function LoginPage() {
     navigate("/dashboard");
   };
 
+  if (isLoading) return <LoadingPage />;
+
+  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+
   return (
     <div
       className={`
@@ -67,7 +69,6 @@ export default function LoginPage() {
         ${darkMode ? "bg-black text-white" : "bg-white text-black"}
       `}
     >
-
       {/* Popup protected route */}
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
@@ -78,9 +79,7 @@ export default function LoginPage() {
             <h2 className="text-xl font-semibold mb-2 text-red-600">
               Peringatan
             </h2>
-            <p>
-              {message || "Harap login untuk melanjutkan."}
-            </p>
+            <p>{message || "Harap login untuk melanjutkan."}</p>
             <button
               onClick={() => {
                 setShowPopup(false);
@@ -107,9 +106,7 @@ export default function LoginPage() {
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
-              <label className="text-sm font-medium">
-                Username
-              </label>
+              <label className="text-sm font-medium">Username</label>
               <input
                 type="text"
                 className={`
@@ -124,9 +121,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium">
-                Password
-              </label>
+              <label className="text-sm font-medium">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -162,11 +157,12 @@ export default function LoginPage() {
               disabled={loading}
               className={`
                 block w-full text-center py-2 rounded-lg transition-all
-                ${loading
-                  ? "bg-gray-400 cursor-not-allowed text-white"
-                  : darkMode
-                  ? "bg-white text-black"
-                  : "bg-black text-white"
+                ${
+                  loading
+                    ? "bg-gray-400 cursor-not-allowed text-white"
+                    : darkMode
+                      ? "bg-white text-black"
+                      : "bg-black text-white"
                 }
               `}
             >

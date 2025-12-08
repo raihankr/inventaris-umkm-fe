@@ -1,27 +1,43 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import {
   Plus,
-  Edit2,
-  Trash2,
   Search,
-  XCircle,
   ChevronLeft,
   ChevronRight,
   RefreshCw,
   EllipsisVertical,
 } from "lucide-react";
-import { apiGet } from "../../lib/api.js";
+import { apiDelete, apiGet, apiPost } from "../../lib/api.js";
 import { GET_USERS } from "../../constants/api/user.js";
 import { useSearchParams } from "react-router-dom";
 import LoadingPage from "../Loading/loading.jsx";
 import { Popover } from "../../components/ui/popover.jsx";
 import { PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
+import { useTheme } from "../../contexts/ThemeContext.jsx";
+import { ValidateUser } from "./ValidateUser.js";
+import ObjectReducer from "../../reducer/ObjectReducer.js";
 
 export default function Users() {
+  const { darkMode } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [errors, dispatchErrors] = useReducer(ObjectReducer, {});
+  const [popup, showPopup] = useState(false);
+  const [popupAction, setPopupAction] = useState(() => {});
+  const [popupTitle, setPopupTitle] = useState("");
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupYes, setPopupYes] = useState(null);
+  const [popupStyle, setPopupStyle] = useState(null);
+  const formRef = useRef(null);
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [currentPage, setCurrentPage] = useState(
+    parseInt(searchParams.get("page")) || 1,
+  );
+  const limit = parseInt(searchParams.get("limit")) || 5;
+  const [showModal, setShowModal] = useState(false);
+  const [showResetPw, setShowResetPw] = useState(false);
+  const [resetId, setResetId] = useState(false);
 
   const columns = [
     { name: "Name", className: "text-left" },
@@ -32,91 +48,64 @@ export default function Users() {
     { name: "Aksi" },
   ];
 
-  const [currentPage, setCurrentPage] = useState(
-    parseInt(searchParams.get("page") || "1"),
-  );
-  const limit = parseInt(searchParams.get("limit") || "5");
-
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(() => {
     setLoading(true);
-    setError(null);
-    try {
-      const result = await apiGet(GET_USERS(currentPage, limit));
-      setData(result.data.result);
-    } catch (err) {
-      setError("Failed to fetch data");
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage, limit]);
+
+    let debounceTimer = setTimeout(
+      async () => {
+        try {
+          setSearchParams((prev) => {
+            const newParams = new URLSearchParams(prev);
+            newParams.set("search", search.trim());
+            return newParams;
+          });
+
+          const result = await apiGet(GET_USERS, {
+            page: currentPage,
+            limit,
+            search: search.trim(),
+          });
+          setData(result.data.result);
+        } catch (err) {
+          dispatchErrors({
+            type: "patch",
+            data: {
+              table: "Failed to fetch data",
+            },
+          });
+        } finally {
+          setLoading(false);
+        }
+      },
+      search ? 500 : 0,
+    ); // Cari user setelah 0.5 detik tidak mengetik
+
+    // Cleanup function - batalkan mencari jika kata kunci pencarian berganti (user mengetik)
+    return () => clearTimeout(debounceTimer);
+  }, [search, setSearchParams, currentPage, limit]);
 
   useEffect(() => {
-    fetchData();
+    return fetchData();
   }, [fetchData]);
 
-  const [stokBarang, setStokBarang] = useState([
-    {
-      id: 1,
-      nama: "Kemeja Batik",
-      kategori: "Pakaian",
-      stok: 45,
-      harga: 150000,
-      satuan: "pcs",
-      minimal: 10,
-    },
-    {
-      id: 2,
-      nama: "Keripik Singkong",
-      kategori: "Makanan",
-      stok: 120,
-      harga: 15000,
-      satuan: "pack",
-      minimal: 20,
-    },
-    {
-      id: 3,
-      nama: "Tas Anyaman",
-      kategori: "Kerajinan",
-      stok: 8,
-      harga: 85000,
-      satuan: "pcs",
-      minimal: 20,
-    },
-    {
-      id: 4,
-      nama: "Kopi Arabika",
-      kategori: "Minuman",
-      stok: 3,
-      harga: 45000,
-      satuan: "pack",
-      minimal: 15,
-    },
-    {
-      id: 5,
-      nama: "Sarung Tenun",
-      kategori: "Pakaian",
-      stok: 0,
-      harga: 200000,
-      satuan: "pcs",
-      minimal: 5,
-    },
-  ]);
+  useEffect(() => {
+    // Set up the debounce timer
+    const debounceTimer = setTimeout(() => {
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev);
+        newParams.set("search", search.trim());
+        return newParams;
+      });
+    }, 500); // Wait 500ms after user stops typing
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({
-    nama: "",
-    kategori: "",
-    stok: "",
-    harga: "",
-    satuan: "",
-    minimal: "",
+    // Cleanup function - cancels the timer if searchTerm changes
+    return () => clearTimeout(debounceTimer);
   });
 
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > data.total_page || newPage === data.page)
       return;
+
     setCurrentPage(newPage);
 
     setSearchParams((prev) => {
@@ -126,96 +115,105 @@ export default function Users() {
     });
   };
 
-  const handleSubmit = () => {
-    if (
-      !formData.nama ||
-      !formData.kategori ||
-      formData.stok === "" ||
-      formData.stok === null ||
-      !formData.harga ||
-      !formData.satuan ||
-      !formData.minimal
-    ) {
-      alert("Mohon lengkapi semua field");
-      return;
+  useEffect(() => {
+    if (showModal) formRef.current.reset();
+  }, [showModal]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const payload = {};
+    for (let [key, value] of formData.entries()) payload[key] = value;
+    try {
+      ValidateUser.validateSync(payload, { abortEarly: false });
+      const result = await apiPost("/users", payload);
+      if (result.error)
+        return dispatchErrors({
+          type: "patch",
+          data: { [result.data.detail[0]]: result.data.message },
+        });
+      fetchData();
+      setShowModal(false);
+    } catch (err) {
+      if (err.inner?.length > 0) {
+        const fieldErrors = {};
+        err.inner.forEach((e) => {
+          fieldErrors[e.path] = e.message;
+        });
+        dispatchErrors({ type: "put", data: fieldErrors });
+      } else {
+        // fallback async Yup error
+        dispatchErrors({ type: "put", data: { form: err.message } });
+      }
     }
-
-    if (editingId) {
-      const updatedStok = stokBarang.map((item) => {
-        if (item.id === editingId) {
-          return { ...formData, id: editingId };
-        }
-        return item;
-      });
-      setStokBarang(updatedStok);
-    } else {
-      const newItem = {
-        ...formData,
-        id: Date.now(),
-      };
-      setStokBarang([...stokBarang, newItem]);
-    }
-
-    setShowModal(false);
-    setEditingId(null);
-    setFormData({
-      nama: "",
-      kategori: "",
-      stok: "",
-      harga: "",
-      satuan: "",
-      minimal: "",
-    });
-  };
-
-  const handleEdit = (item) => {
-    setFormData(item);
-    setEditingId(item.id);
-    setShowModal(true);
   };
 
   const handleDelete = (id) => {
-    const confirmDelete = confirm("Yakin ingin menghapus barang ini?");
-    if (confirmDelete) {
-      const updatedStok = stokBarang.filter((item) => item.id !== id);
-      setStokBarang(updatedStok);
-    }
+    setPopupAction(() => async () => {
+      const res = await apiDelete(`/users/${id}`);
+      if (res.error) {
+        setPopupTitle("Gagal menghapus pengguna");
+        setPopupMessage(res.data.message);
+        setPopupYes("Coba lagi");
+      }
+      fetchData();
+    });
+    setPopupTitle("Hapus Pengguna");
+    setPopupMessage("Yakin ingin menghapus user ini?");
+    setPopupYes("Ya, hapus");
+    setPopupStyle("warning");
+    showPopup(true);
   };
 
-  const handleTambahBarang = () => {
+  const handleTambahUser = () => {
     setShowModal(true);
-    setEditingId(null);
-    setFormData({
-      nama: "",
-      kategori: "",
-      stok: "",
-      harga: "",
-      satuan: "",
-      minimal: "",
-    });
+    // kosongkan pesan error
+    dispatchErrors({ type: "put", data: {} });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-3 sm:p-6">
+      {popup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div
+            className={`px-8 py-6 rounded-xl shadow-xl text-center max-w-sm
+              ${darkMode ? "bg-neutral-900 text-white" : "bg-white text-black"}`}
+          >
+            <h2 className="text-xl font-semibold mb-2">{popupTitle}</h2>
+            <p>{popupMessage || "Harap login untuk melanjutkan."}</p>
+            <div className="flex flex-row gap-3 [&>*]:flex-1">
+              <button
+                onClick={() => {
+                  showPopup(false);
+                  window.history.replaceState({}, "");
+                }}
+                className="mt-4 px-4 py-2 text-white rounded-lg"
+                style={{ backgroundColor: "var(--foreground)" }}
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  popupAction();
+                  showPopup(false);
+                }}
+                className={`mt-4 px-4 font-bold py-2 text-white rounded-lg ${popupStyle == "warning" ? "bg-red-500" : "bg-green-600"}`}
+              >
+                {popupYes || "Oke"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}{" "}
       {/* btn tambah barang buat di mobile */}
       <button
         onClick={() => {
           setShowModal(true);
-          setEditingId(null);
-          setFormData({
-            nama: "",
-            kategori: "",
-            stok: "",
-            harga: "",
-            satuan: "",
-            minimal: "",
-          });
         }}
         className="sm:hidden fixed bottom-5 right-5 bg-gray-900 hover:bg-black text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-all"
       >
         <Plus size={28} />
       </button>
-
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-gray-800 to-black bg-clip-text text-transparent">
@@ -232,8 +230,8 @@ export default function Users() {
             <input
               type="text"
               placeholder="Cari barang atau kategori..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-white border-2 border-gray-300 rounded-lg pl-12 pr-4 py-2 md:py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-gray-800 transition-all"
             />
           </div>
@@ -245,7 +243,7 @@ export default function Users() {
           </button>
 
           <button
-            onClick={handleTambahBarang}
+            onClick={handleTambahUser}
             className="bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg"
           >
             <Plus size={20} />
@@ -257,9 +255,9 @@ export default function Users() {
           <div className="overflow-x-auto">
             {loading ? (
               <LoadingPage full />
-            ) : error ? (
+            ) : errors.table ? (
               <div className="w-full h-full p-20 flex items-center justify-center">
-                {error}
+                {errors.table}
               </div>
             ) : (
               <table className="w-full">
@@ -268,6 +266,7 @@ export default function Users() {
                     {columns.map((column) => {
                       return (
                         <th
+                          key={column.name}
                           className={`px-6 py-4 text-sm fmnt-semibold ${column.className}`}
                         >
                           {column.name}
@@ -314,11 +313,17 @@ export default function Users() {
                                 </button>
                               </PopoverTrigger>
                               <PopoverContent className="w-40 p-2">
-                                <div
-                                  className="flex flex-col space-y-1 bg-sidebar shadow-xl border-border border-1 rounded-md p-2"
-                                >
-                                  <button className="px-3 py-2 text-red-500 rounded-md hover:bg-sidebar-hover text-sm text-left w-full">Hapus</button>
-                                  <button className="px-3 py-2 rounded-md hover:bg-sidebar-hover text-sm text-left w-full">
+                                <div className="flex flex-col space-y-1 bg-sidebar shadow-xl border-border border-1 rounded-md p-2">
+                                  <button
+                                    className="px-3 py-2 text-red-500 rounded-md hover:bg-sidebar-hover text-sm text-left w-full"
+                                    onClick={() => handleDelete(user.id_user)}
+                                  >
+                                    Hapus
+                                  </button>
+                                  <button
+                                    onClick=""
+                                    className="px-3 py-2 rounded-md hover:bg-sidebar-hover text-sm text-left w-full"
+                                  >
                                     Reset password
                                   </button>
                                 </div>
@@ -389,122 +394,56 @@ export default function Users() {
           </div>
         )}
 
-        {showModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl border-2 border-gray-300 p-6 w-full max-w-md shadow-2xl">
+        {showResetPw && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 ">
+            <div className="bg-white rounded-xl border-2 border-gray-300 p-6 w-full max-w-md shadow-2xl max-h-[80vh]">
               <h2 className="text-2xl font-bold mb-6 text-gray-800">
-                {editingId ? "Edit Barang" : "Tambah Barang Baru"}
+                Tambah Pengguna Baru
               </h2>
 
-              <div className="space-y-4">
+              <form
+                ref={null}
+                onSubmit={handleSubmit}
+                noValidate
+                className="space-y-4"
+              >
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nama Barang
+                    Password*
                   </label>
                   <input
-                    type="text"
-                    value={formData.nama}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nama: e.target.value })
-                    }
+                    type="password"
+                    name="password"
                     className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
-                    placeholder="Contoh: Kemeja Batik"
+                    placeholder="Password"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Kategori
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.kategori}
-                    onChange={(e) =>
-                      setFormData({ ...formData, kategori: e.target.value })
-                    }
-                    className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
-                    placeholder="Contoh: Pakaian"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Stok
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.stok}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setFormData({
-                          ...formData,
-                          stok: value === "" ? "" : parseInt(value),
-                        });
-                      }}
-                      className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
-                      placeholder="0"
-                      min="0"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Satuan
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.satuan}
-                      onChange={(e) =>
-                        setFormData({ ...formData, satuan: e.target.value })
-                      }
-                      className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
-                      placeholder="pcs"
-                    />
-                  </div>
+                  {errors.password && (
+                    <p className="text-xs text-red-500">{errors.password}</p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Harga
+                    Konfirmasi Password*
                   </label>
                   <input
-                    type="number"
-                    value={formData.harga}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        harga: parseInt(e.target.value) || "",
-                      })
-                    }
+                    type="password"
+                    name="confirm_password"
                     className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
-                    placeholder="150000"
+                    placeholder="Password"
                   />
+                  {errors.confirm_password && (
+                    <p className="text-xs text-red-500">
+                      {errors.confirm_password}
+                    </p>
+                  )}
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Stok Minimal
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.minimal}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        minimal: parseInt(e.target.value) || "",
-                      })
-                    }
-                    className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
-                    placeholder="10"
-                  />
-                </div>
-
                 <div className="flex gap-3 mt-6">
                   <button
-                    onClick={handleSubmit}
+                    type="submit"
                     className="flex-1 bg-gray-900 hover:bg-black text-white py-2 rounded-lg font-semibold transition-all"
                   >
-                    {editingId ? "Update" : "Simpan"}
+                    Simpan
                   </button>
                   <button
                     onClick={() => setShowModal(false)}
@@ -513,7 +452,163 @@ export default function Users() {
                     Batal
                   </button>
                 </div>
-              </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {showModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl border-2 border-gray-300 p-6 w-full max-w-md shadow-2xl max-h-[80vh] overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+              <h2 className="text-2xl font-bold mb-6 text-gray-800">
+                Tambah Pengguna Baru
+              </h2>
+
+              <form
+                ref={formRef}
+                onSubmit={handleSubmit}
+                noValidate
+                className="space-y-4"
+              >
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Username*
+                  </label>
+                  <input
+                    type="text"
+                    name="username"
+                    className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                    placeholder="johndoe"
+                  />
+                  {errors.username && (
+                    <p className="text-xs text-red-500">{errors.username}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nama Pengguna*
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                    placeholder="John Doe"
+                  />
+                  {errors.name && (
+                    <p className="text-xs text-red-500">{errors.name}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Role*
+                  </label>
+                  <select
+                    name="role"
+                    className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                    placeholder="0"
+                    min="0"
+                  >
+                    <option value="user">Karyawan</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                  {errors.role && (
+                    <p className="text-xs text-red-500">{errors.role}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email*
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                    placeholder="johndoe@example.com"
+                  />
+                  {errors.email && (
+                    <p className="text-xs text-red-500">{errors.email}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Password*
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                    placeholder="Password"
+                  />
+                  {errors.password && (
+                    <p className="text-xs text-red-500">{errors.password}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Konfirmasi Password*
+                  </label>
+                  <input
+                    type="password"
+                    name="confirm_password"
+                    className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                    placeholder="Password"
+                  />
+                  {errors.confirm_password && (
+                    <p className="text-xs text-red-500">
+                      {errors.confirm_password}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    No. Telepon/Kontak
+                  </label>
+                  <input
+                    type="string"
+                    name="contact"
+                    className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                    placeholder="6281234567890"
+                  />
+                  {errors.contact && (
+                    <p className="text-xs text-red-500">{errors.contact}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Alamat
+                  </label>
+                  <textarea
+                    name="address"
+                    className="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-gray-800"
+                    placeholder="Jl. Apel No. 9"
+                  />
+                  {errors.address && (
+                    <p className="text-xs text-red-500">{errors.address}</p>
+                  )}
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-gray-900 hover:bg-black text-white py-2 rounded-lg font-semibold transition-all"
+                  >
+                    Simpan
+                  </button>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
