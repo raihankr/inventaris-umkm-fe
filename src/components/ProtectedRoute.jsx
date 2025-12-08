@@ -1,5 +1,5 @@
-import { Navigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext.js";
+import {Navigate} from "react-router-dom";
+import {useAuth} from "@/contexts/AuthContext.js";
 import LoadingPage from "../pages/Loading/loading.jsx";
 
 export default function ProtectedRoute({ children, allowedRoles }) {

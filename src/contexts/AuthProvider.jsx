@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { apiGet } from "../lib/api.js";
+import api, { apiGet } from "../lib/api.js";
 import { AuthContext } from "@/contexts/AuthContext.js";
-import {GET_USER_ME} from "@/constants/api/user.js";
+import { GET_USER_ME } from "@/constants/api/user.js";
 
 // Provider component
 export const AuthProvider = ({ children }) => {
@@ -34,6 +34,23 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    // Setup interceptor
+    const interceptor = api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          setIsAuthenticated(false);
+        }
+        return Promise.reject(error);
+      },
+    );
+    return () => {
+      api.interceptors.response.eject(interceptor);
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log("check auth status");
     fetchAuthStatus();
   }, []); // Run once on component mount
 
@@ -43,6 +60,7 @@ export const AuthProvider = ({ children }) => {
   const contextValue = {
     userInfo,
     isAuthenticated,
+    setIsAuthenticated,
     isLoading,
     error,
     refetchAuthStatus,

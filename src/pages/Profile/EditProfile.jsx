@@ -67,7 +67,7 @@ export default function EditProfile({ onUpdate, onClose }) {
       } else {
         setErrors({ form: res.message }); // handle error dari API
       }
-      await refetchAuthStatus(); // Refresh data user di context setelah update
+      refetchAuthStatus(); // Refresh data user di context setelah update
 
     } catch (err) {
       if (err.inner?.length > 0) {
