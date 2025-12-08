@@ -320,7 +320,10 @@ export default function Users() {
                                   >
                                     Hapus
                                   </button>
-                                  <button onClick={} className="px-3 py-2 rounded-md hover:bg-sidebar-hover text-sm text-left w-full">
+                                  <button
+                                    onClick=""
+                                    className="px-3 py-2 rounded-md hover:bg-sidebar-hover text-sm text-left w-full"
+                                  >
                                     Reset password
                                   </button>
                                 </div>
@@ -392,8 +395,8 @@ export default function Users() {
         )}
 
         {showResetPw && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl border-2 border-gray-300 p-6 w-full max-w-md shadow-2xl max-h-[80vh] overflow-y-scroll">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 ">
+            <div className="bg-white rounded-xl border-2 border-gray-300 p-6 w-full max-w-md shadow-2xl max-h-[80vh]">
               <h2 className="text-2xl font-bold mb-6 text-gray-800">
                 Tambah Pengguna Baru
               </h2>
@@ -456,7 +459,7 @@ export default function Users() {
 
         {showModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl border-2 border-gray-300 p-6 w-full max-w-md shadow-2xl max-h-[80vh] overflow-y-scroll">
+            <div className="bg-white rounded-xl border-2 border-gray-300 p-6 w-full max-w-md shadow-2xl max-h-[80vh] overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
               <h2 className="text-2xl font-bold mb-6 text-gray-800">
                 Tambah Pengguna Baru
               </h2>
