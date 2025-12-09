@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useState} from "react";
 import {
   Sidebar,
   SidebarHeader,
@@ -27,17 +27,16 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 
-import { useAuth } from "@/contexts/AuthContext"; // untuk ambil data user
+import {useAuth} from "@/contexts/AuthContext"; // untuk ambil data user
 
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { MoreVertical } from "lucide-react";
-import { Link, NavLink } from "react-router-dom";
+import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar";
+import {MoreVertical} from "lucide-react";
+import {Link, NavLink} from "react-router-dom";
 
-import Profile from '@/pages/Profile/Profile.jsx';
-import EditProfile from '@/pages/Profile/EditProfile.jsx';
+import Profile from "@/pages/Profile/Profile.jsx";
+import EditProfile from "@/pages/Profile/EditProfile.jsx";
 import Logout from "@/pages/Login/logout.jsx";
 import Settings from "@/pages/Settings/Settings";
-import { Button } from "@/components/ui/button";
 
 import ProjectLogo from "@/assets/icons/company-logo/FaStock.png";
 import DashboardLogo from "@/assets/icons/material-symbols--dashboard-outline-rounded.svg?react";
@@ -51,7 +50,6 @@ export default function AppSidebar() {
   const [showSettings, setShowSettings] = useState(false); // dialog settings
   const { userInfo } = useAuth();
 
-
   // Daftar menu sidebar
   const menuItems = [
     { icon: DashboardLogo, label: "Dashboard", href: "/dashboard" },
@@ -60,15 +58,13 @@ export default function AppSidebar() {
   ];
 
   if (userInfo.role === "admin")
-    menuItems.push(
-      { icon: UserLogo, label: "Manajemen User", href: "/users" },
-    );
+    menuItems.push({ icon: UserLogo, label: "Manajemen User", href: "/users" });
   // Ambil data user dari context
   const user = userInfo || {
     username: "loading...",
     name: "Loading...",
     email: "",
-    avatar: "",
+    image: "",
     role: "",
   };
 
@@ -108,13 +104,17 @@ export default function AppSidebar() {
                           tooltip={item.label}
                           data-active={isActive ? "true" : "false"}
                         >
-                          <div className={`flex items-center rounded-md transition-all duration-200 ${open ? "px-4 py-2 gap-3 justify-start" : "p-2 justify-center"}`}>
+                          <div
+                            className={`flex items-center rounded-md transition-all duration-200 ${open ? "px-4 py-2 gap-3 justify-start" : "p-2 justify-center"}`}
+                          >
                             {typeof item.icon === "string" ? (
                               <item.icon className="h-5 w-5 icon text-foreground" />
                             ) : (
                               <item.icon size={20} />
                             )}
-                            {open && <span className="text-base">{item.label}</span>}
+                            {open && (
+                              <span className="text-base">{item.label}</span>
+                            )}
                           </div>
                         </SidebarMenuButton>
                       )}
@@ -129,16 +129,23 @@ export default function AppSidebar() {
         {/* Footer: profile + logout */}
         <SidebarFooter className="p-0 border-t">
           <div className="p-2">
-            <div className={`flex items-center rounded-md px-2 py-2 transition-colors duration-200 hover:bg-sidebar-accent group ${open ? "justify-between" : "justify-center"}`}>
+            <div
+              className={`flex items-center rounded-md px-2 py-2 transition-colors duration-200 hover:bg-sidebar-accent group ${open ? "justify-between" : "justify-center"}`}
+            >
               {/* Profile Section */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <button className={`flex items-center ${open ? "gap-2 flex-1 text-left min-w-0" : "justify-center w-full"}`}>
-
+                  <button
+                    className={`flex items-center ${open ? "gap-2 flex-1 text-left min-w-0" : "justify-center w-full"}`}
+                  >
                     {/* Avatar*/}
                     <div className="flex-shrink-0">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.avatar || "https://ui.shadcn.com/avatars/01.png"} />
+                        <AvatarImage
+                          src={
+                            user.image || "https://ui.shadcn.com/avatars/01.png"
+                          }
+                        />
                         <AvatarFallback>
                           {user.name ? user.name[0] : "U"}
                         </AvatarFallback>
@@ -146,9 +153,15 @@ export default function AppSidebar() {
                     </div>
 
                     {/* Text Info */}
-                    <div className={`flex flex-col transition-all duration-300 overflow-hidden ${open ? "opacity-100 max-w-[120px]" : "opacity-0 max-w-0"}`}>
-                      <span className="font-semibold text-sm leading-tight">{user.name}</span>
-                      <span className="text-xs text-muted-foreground leading-tight mt-0.5">@{user.username}</span>
+                    <div
+                      className={`flex flex-col transition-all duration-300 overflow-hidden ${open ? "opacity-100 max-w-[120px]" : "opacity-0 max-w-0"}`}
+                    >
+                      <span className="font-semibold text-sm leading-tight">
+                        {user.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground leading-tight mt-0.5">
+                        @{user.username}
+                      </span>
                     </div>
                   </button>
                 </PopoverTrigger>
@@ -161,7 +174,9 @@ export default function AppSidebar() {
               </Popover>
 
               {/* More Options */}
-              <div className={`transition-all duration-300 ${open ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}>
+              <div
+                className={`transition-all duration-300 ${open ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}
+              >
                 <Popover>
                   <PopoverTrigger asChild>
                     <button className="p-1 rounded-md hover:bg-sidebar-hover">
@@ -170,11 +185,11 @@ export default function AppSidebar() {
                   </PopoverTrigger>
                   <PopoverContent className="w-40 p-2">
                     <div className="flex flex-col space-y-1">
-
                       {/* Edit Profile */}
                       <button
                         className="px-3 py-2 rounded-md hover:bg-accent text-sm text-left w-full"
-                        onClick={() => setShowEditProfile(true)}>
+                        onClick={() => setShowEditProfile(true)}
+                      >
                         Edit Profile
                       </button>
 
@@ -183,7 +198,8 @@ export default function AppSidebar() {
                         <PopoverTrigger asChild>
                           <button
                             className="px-3 py-2 rounded-md hover:bg-accent text-sm text-left w-full"
-                            onClick={() => setShowSettings(true)}>
+                            onClick={() => setShowSettings(true)}
+                          >
                             Settings
                           </button>
                         </PopoverTrigger>
@@ -242,8 +258,7 @@ export default function AppSidebar() {
 
           <DialogHeader>
             <DialogTitle>Settings</DialogTitle>
-            <DialogDescription>
-            </DialogDescription>
+            <DialogDescription></DialogDescription>
           </DialogHeader>
           <Settings />
         </DialogContent>

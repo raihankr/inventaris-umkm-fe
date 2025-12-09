@@ -231,7 +231,11 @@ export default function Users() {
               type="text"
               placeholder="Cari barang atau kategori..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                // Kembali ke page 1 saat searching
+                setCurrentPage(1);
+              }}
               className="w-full bg-white border-2 border-gray-300 rounded-lg pl-12 pr-4 py-2 md:py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-gray-800 transition-all"
             />
           </div>
@@ -321,7 +325,6 @@ export default function Users() {
                                     Hapus
                                   </button>
                                   <button
-                                    onClick=""
                                     className="px-3 py-2 rounded-md hover:bg-sidebar-hover text-sm text-left w-full"
                                   >
                                     Reset password

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import api, { apiGet } from "../lib/api.js";
 import { AuthContext } from "@/contexts/AuthContext.js";
 import { GET_USER_ME } from "@/constants/api/user.js";
+import { supabase } from "../lib/supabase.js";
 
 // Provider component
 export const AuthProvider = ({ children }) => {
@@ -15,13 +16,20 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await apiGet(GET_USER_ME);
+      const userInfo = response.data.data;
+      const { data: avatar } = userInfo.image
+        ? supabase.storage.from("fastock").getPublicUrl(userInfo.image)
+        : {};
 
       if (response.status != 200) {
         // Handle non-2xx responses (e.g., 401 Unauthorized)
         throw new Error("Authentication check failed");
       }
 
-      setUserInfo(response.data.data);
+      setUserInfo({
+        ...userInfo,
+        image: avatar.publicUrl,
+      });
       setIsAuthenticated(true);
     } catch (err) {
       console.error("Error fetching auth status:", err);
@@ -50,7 +58,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    console.log("check auth status");
     fetchAuthStatus();
   }, []); // Run once on component mount
 
