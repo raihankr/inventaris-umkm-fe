@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
 
       setUserInfo({
         ...userInfo,
-        image: avatar.publicUrl,
+        image: avatar?.publicUrl,
       });
       setIsAuthenticated(true);
     } catch (err) {

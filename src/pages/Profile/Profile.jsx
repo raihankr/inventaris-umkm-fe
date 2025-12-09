@@ -14,7 +14,7 @@ export default function Profile({ user, onEdit }) { // Menerima props user dan o
 
       {/* Avatar */}
       <Avatar className="w-24 h-24">
-        <AvatarImage src={user.avatar || ""} alt={user.username || user.name || "user"} />
+        <AvatarImage src={user.image || ""} alt={user.username || user.name || "user"} />
         <AvatarFallback>
           {(user.username?.[0] || user.name?.[0] || '?').toUpperCase()}
         </AvatarFallback>
