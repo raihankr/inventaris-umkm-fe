@@ -15,6 +15,7 @@ import Login from "@/pages/Login/login";
 import Users from "../pages/Users/Users.jsx";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import NotFound from "@/pages/NotFound/NotFound";
+import Kategori from "@/pages/Kategori/Kategori";
 
 export default function AppRoutes() {
   return (
@@ -40,6 +41,7 @@ export default function AppRoutes() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/stok" element={<Stok />} />
             <Route path="/transaksi" element={<Transaksi />} />
+             <Route path="/kategori" element={<Kategori />} />
           </Route>
 
           <Route

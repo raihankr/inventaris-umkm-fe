@@ -215,13 +215,14 @@ export default function StokUMKM() {
             />
           </div>
 
-          <button
-            onClick={showModal}
-            className="hidden sm:flex bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg"
-          >
-            <Plus size={20} />
-            Tambah Barang
-          </button>
+         <button
+  onClick={openModal}
+  className="hidden sm:flex bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg"
+>
+  <Plus size={20} />
+  Tambah Barang
+</button>
+
         </div>
 
         {/* ============================

@@ -30,7 +30,7 @@ import {
 import {useAuth} from "@/contexts/AuthContext"; // untuk ambil data user
 
 import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar";
-import {MoreVertical} from "lucide-react";
+import {MoreVertical, Tag} from "lucide-react";
 import {Link, NavLink} from "react-router-dom";
 
 import Profile from "@/pages/Profile/Profile.jsx";
@@ -55,6 +55,7 @@ export default function AppSidebar() {
     { icon: DashboardLogo, label: "Dashboard", href: "/dashboard" },
     { icon: TransaksiLogo, label: "Transaksi", href: "/transaksi" },
     { icon: StokLogo, label: "Stok Barang", href: "/stok" },
+     { icon: Tag, label: "Kategori", href: "/kategori" },
   ];
 
   if (userInfo.role === "admin")
