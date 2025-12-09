@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { XIcon } from "lucide-react";
 
 import {
@@ -30,115 +30,112 @@ import {
   DialogOverlay,
 } from "@/components/ui/dialog";
 
-// Dummy
-const transaksiTerbaru = [
-  {
-    id: "TRX001",
-    nama: "Andi",
-    total: 52000,
-    items: [
-      { nama: "Gula Pasir", harga: 15000 },
-      { nama: "Minyak Goreng", harga: 37000 },
-    ],
-  },
-  {
-    id: "TRX002",
-    nama: "Budi",
-    total: 34000,
-    items: [
-      { nama: "Kopi Bubuk", harga: 12000 },
-      { nama: "Gula Pasir", harga: 22000 },
-    ],
-  },
-  {
-    id: "TRX003",
-    nama: "Siti",
-    total: 78000,
-    items: [
-      { nama: "Beras 5kg", harga: 62000 },
-      { nama: "Telur Ayam", harga: 16000 },
-    ],
-  },
-  {
-    id: "TRX004",
-    nama: "Rudi",
-    total: 21000,
-    items: [
-      { nama: "Masako", harga: 10000 },
-      { nama: "Kopi Bubuk", harga: 11000 },
-    ],
-  },
-];
+import { apiGet } from "@/lib/api";
+import { GET_RECENT_TRANSACTIONS } from "@/constants/api/dashboard";
 
-//  widget
 export default function WidgetTransaksiTerbaru() {
+  const [data, setData] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  async function loadData() {
+    setLoading(true);
+    const res = await apiGet(GET_RECENT_TRANSACTIONS);
+
+    if (res.error) {
+      setError(res.message || "Gagal memuat data transaksi");
+      setLoading(false);
+      return;
+    }
+
+    setData(res?.data?.data || []); // pastikan format sesuai API-mu
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   return (
     <Card className="h-full w-full flex flex-col">
       <CardHeader>
         <CardTitle>Transaksi Terbaru</CardTitle>
-        <CardDescription>
-          10 transaksi pembelian terakhir
-        </CardDescription>
+        <CardDescription>10 transaksi pembelian terakhir</CardDescription>
       </CardHeader>
 
       <CardContent className="flex flex-col min-h-[350px]">
-        <div className="flex-1 overflow-y-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[140px] text-left">ID</TableHead>
-                <TableHead className="text-left">Pembeli</TableHead>
-                <TableHead className="w-[160px] text-right">Total</TableHead>
-                <TableHead className="w-[120px] text-center">Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
+        {loading && (
+          <div className="text-center py-6 text-sm text-muted-foreground">
+            Memuat transaksi...
+          </div>
+        )}
 
-            <TableBody>
-              {transaksiTerbaru.map((trx) => (
-                <TableRow key={trx.id}>
-                  <TableCell className="font-medium w-[140px]">
-                    {trx.id}
-                  </TableCell>
+        {error && (
+          <div className="text-center py-6 text-sm text-red-500">
+            {error}
+          </div>
+        )}
 
-                  <TableCell className="text-left">
-                    {trx.nama}
-                  </TableCell>
-
-                  <TableCell className="text-right w-[160px]">
-                    Rp {trx.total.toLocaleString("id-ID")}
-                  </TableCell>
-
-                  <TableCell className="text-center w-[120px]">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setSelected(trx)}
-                    >
-                      Detail
-                    </Button>
-                  </TableCell>
+        {!loading && !error && (
+          <div className="flex-1 overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[140px]">ID</TableHead>
+                  <TableHead>Pembeli</TableHead>
+                  <TableHead className="w-[160px] text-right">Total</TableHead>
+                  <TableHead className="w-[120px] text-center">Aksi</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+
+              <TableBody>
+                {data.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-4 text-sm">
+                      Tidak ada transaksi ditemukan.
+                    </TableCell>
+                  </TableRow>
+                )}
+
+                {data.map((trx) => (
+                  <TableRow key={trx.id_transaction}>
+                    <TableCell className="font-medium">
+                      {trx.id_transaction}
+                    </TableCell>
+
+                    <TableCell>
+                      {trx.users?.name || "-"}
+                    </TableCell>
+
+                    <TableCell className="text-right">
+                      Rp {trx.total_price?.toLocaleString("id-ID")}
+                    </TableCell>
+
+                    <TableCell className="text-center">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSelected(trx)}
+                      >
+                        Detail
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </CardContent>
 
-      {/* Dialog for transaction detail */}
+      {/* Dialog */}
       <Dialog
         open={!!selected}
-        onOpenChange={(open) => {
-          if (!open) setSelected(null);
-        }}
+        onOpenChange={(open) => !open && setSelected(null)}
       >
         <DialogOverlay className="bg-black/50 backdrop-blur-sm" />
-        <DialogContent
-          showCloseButton={false}
-          onInteractOutside={(e) => e.preventDefault()}
-          className="sm:max-w-[520px]"
-        >
+        <DialogContent className="sm:max-w-[520px]" showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Detail Transaksi</DialogTitle>
             <DialogDescription>
@@ -146,12 +143,11 @@ export default function WidgetTransaksiTerbaru() {
             </DialogDescription>
           </DialogHeader>
 
-          {/* custom top-right close using project Button */}
           <DialogClose asChild>
             <Button
               size="icon"
               variant="ghost"
-              className="absolute top-4 right-4 hover:bg-transparent hover:text-current focus-visible:ring-0 active:bg-transparent shadow-none"
+              className="absolute top-4 right-4 shadow-none"
             >
               <XIcon />
             </Button>
@@ -159,21 +155,22 @@ export default function WidgetTransaksiTerbaru() {
 
           {selected && (
             <div className="space-y-3">
-              <div className="space-y-1">
-                {selected.items.map((item, i) => (
-                  <div key={i} className="flex justify-between text-sm">
-                    <span>{item.nama}</span>
-                    <span>Rp {item.harga.toLocaleString("id-ID")}</span>
-                  </div>
-                ))}
-              </div>
+              {selected.items?.map((item) => (
+                <div key={item.id_trx_item} className="flex justify-between text-sm">
+                  <span>
+                    {item.product?.name} x {item.amount}
+                  </span>
+                  <span>
+                    Rp {item.price?.toLocaleString("id-ID")}
+                  </span>
+                </div>
+              ))}
 
               <div className="border-t pt-2 text-sm font-semibold flex justify-between">
                 <span>Total</span>
-                <span>Rp {selected.total.toLocaleString("id-ID")}</span>
+                <span>Rp {selected.total?.toLocaleString("id-ID")}</span>
               </div>
 
-              {/* footer with close button (left aligned) */}
               <DialogFooter>
                 <div className="flex justify-between mt-4 sticky bottom-0 bg-background py-2 border-t">
                   <Button variant="outline" onClick={() => setSelected(null)}>

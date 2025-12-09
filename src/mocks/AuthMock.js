@@ -1,5 +1,4 @@
-// src/mocks/authMock.js
-
+// Ini adalah user mock untuk proses login
 export const mockUser = {
   email: "admin-umkm@yopmail.com",
   password: "test",
