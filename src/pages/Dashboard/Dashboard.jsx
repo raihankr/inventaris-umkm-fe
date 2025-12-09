@@ -4,6 +4,7 @@
 import ChartPenjualan from "./widgets/ChartPenjualan"
 import WidgetStokRendah from "./widgets/WidgetStokRendah"
 import WidgetTransaksiTerbaru from "./widgets/WidgetTransaksiTerbaru"
+import Statistic from "./widgets/Statistic"
 
 export default function Dashboard() {
   return (
@@ -23,7 +24,10 @@ export default function Dashboard() {
 
         {/* body */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          
+
+          {/* Statistic (3 Card) */}
+          <Statistic />
+
           {/* Chart Penjualan (Lebar 2 Kolom) */}
           <div className="lg:col-span-2">
             <ChartPenjualan />

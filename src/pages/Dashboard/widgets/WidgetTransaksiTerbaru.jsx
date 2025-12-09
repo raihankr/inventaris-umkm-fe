@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { XIcon } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 import {
   Card,
@@ -66,8 +67,8 @@ export default function WidgetTransaksiTerbaru() {
 
       <CardContent className="flex flex-col min-h-[350px]">
         {loading && (
-          <div className="text-center py-6 text-sm text-muted-foreground">
-            Memuat transaksi...
+          <div className="flex-1 flex items-center justify-center">
+            <Spinner className="w-8 h-8 text-muted-foreground" />
           </div>
         )}
 
@@ -139,7 +140,7 @@ export default function WidgetTransaksiTerbaru() {
           <DialogHeader>
             <DialogTitle>Detail Transaksi</DialogTitle>
             <DialogDescription>
-              Rincian pembelian {selected?.id}
+              Rincian pembelian {selected?.id_transaction}
             </DialogDescription>
           </DialogHeader>
 
@@ -168,7 +169,7 @@ export default function WidgetTransaksiTerbaru() {
 
               <div className="border-t pt-2 text-sm font-semibold flex justify-between">
                 <span>Total</span>
-                <span>Rp {selected.total?.toLocaleString("id-ID")}</span>
+                <span>Rp {selected.total_price?.toLocaleString("id-ID")}</span>
               </div>
 
               <DialogFooter>

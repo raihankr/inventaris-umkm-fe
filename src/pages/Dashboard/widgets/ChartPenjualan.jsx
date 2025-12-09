@@ -146,7 +146,7 @@ export default function ChartPenjualan() {
   // WIDGET UTAMA
   return (
     <Card>
-      <CardHeader className="flex items-start justify-between gap-4">
+      <CardHeader className="flex flex-col sm:flex-row items-start justify-between gap-4">
         <div>
           <CardTitle>Tren Penjualan & Pembelian</CardTitle>
           <CardDescription>
@@ -161,7 +161,7 @@ export default function ChartPenjualan() {
           </CardDescription>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 mt-3 sm:mt-0">
           {["1m", "3m", "6m", "12m"].map((p) => (
             <button
               key={p}
