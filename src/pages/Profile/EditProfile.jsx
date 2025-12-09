@@ -7,6 +7,7 @@ import { ValidateProfile } from "./ValidateProfile";
 import { apiPatch } from "@/lib/api";
 import { UPDATE_USER } from "@/constants/api/user";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "../../lib/supabase.js";
 
 export default function EditProfile({ onUpdate, onClose }) {
   const { userInfo: user, refetchAuthStatus } = useAuth();
@@ -16,7 +17,7 @@ export default function EditProfile({ onUpdate, onClose }) {
   const [contact, setcontact] = useState(user.contact ?? "");
   const [address, setAddress] = useState(user.address ?? "");
   const [avatarFile, setAvatarFile] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState(user.avatar || "");
+  const [avatarPreview, setAvatarPreview] = useState(user.image || "");
 
   // State untuk error validasi (pake yup di validateprofile.jsx)
   const [errors, setErrors] = useState({});
@@ -40,22 +41,23 @@ export default function EditProfile({ onUpdate, onClose }) {
       email,
       contact,
       address,
-      avatar: user.avatar,
+      image: user.image,
     };
 
     try {
-
       setErrors({}); // Reset error sebelum validasi ulang
       await ValidateProfile.validate(updatedUser, { abortEarly: false }); // Validasi form dengan Yup
 
       let payload; // payload adalah paket data berisi informasi user yang akan dikirim ke API
       if (avatarFile) {
-        payload = new FormData();
-        payload.append("name", name);
-        payload.append("email", email);
-        payload.append("contact", contact);
-        payload.append("address", address);
-        payload.append("avatar", avatarFile);
+        const { data } = await supabase.storage
+          .from("fastock")
+          .upload(`user/${user.id_user}`, avatarFile, {
+            upsert: true,
+            contentType: avatarFile.type,
+          });
+
+        payload = { ...updatedUser, image: data.path };
       } else {
         payload = updatedUser;
       }
@@ -68,7 +70,6 @@ export default function EditProfile({ onUpdate, onClose }) {
         setErrors({ form: res.message }); // handle error dari API
       }
       refetchAuthStatus(); // Refresh data user di context setelah update
-
     } catch (err) {
       if (err.inner?.length > 0) {
         const fieldErrors = {};
@@ -139,7 +140,9 @@ export default function EditProfile({ onUpdate, onClose }) {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
           />
-          {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+          {errors.email && (
+            <p className="text-xs text-red-500">{errors.email}</p>
+          )}
         </div>
 
         {/* Input field nomor telepon */}
@@ -152,7 +155,9 @@ export default function EditProfile({ onUpdate, onClose }) {
             onChange={(e) => setcontact(e.target.value)}
             placeholder="e.g. +62 812 3456 7890"
           />
-          {errors.contact && <p className="text-xs text-red-500">{errors.contact}</p>}
+          {errors.contact && (
+            <p className="text-xs text-red-500">{errors.contact}</p>
+          )}
         </div>
 
         {/* Input field alamat */}
