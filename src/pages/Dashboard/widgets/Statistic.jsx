@@ -4,6 +4,7 @@ import { PackageIcon, ArchiveIcon, CreditCardIcon } from "lucide-react"
 import { useTheme } from "../../../contexts/ThemeContext"
 import { apiGet } from "@/lib/api"
 import { GET_STATISTICS } from "@/constants/api/dashboard"
+import { Spinner } from "@/components/ui/spinner"
 
 export default function Statistic() {
     const { darkMode: isDark } = useTheme()
@@ -40,10 +41,18 @@ export default function Statistic() {
     if (loading) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:col-span-3">
-                <Card className="rounded-xl p-5 border-2 h-24 animate-pulse" />
-                <Card className="rounded-xl p-5 border-2 h-24 animate-pulse" />
-                <Card className="rounded-xl p-5 border-2 h-24 animate-pulse" />
-                <Card className="rounded-xl p-5 border-2 h-24 animate-pulse" />
+                <Card className="rounded-xl p-5 border-2 h-24 flex justify-center items-center">
+                    <Spinner className="w-8 h-8" />
+                </Card>
+                <Card className="rounded-xl p-5 border-2 h-24 flex justify-center items-center">
+                    <Spinner className="w-8 h-8" />
+                </Card>
+                <Card className="rounded-xl p-5 border-2 h-24 flex justify-center items-center">
+                    <Spinner className="w-8 h-8" />
+                </Card>
+                <Card className="rounded-xl p-5 border-2 h-24 flex justify-center items-center">
+                    <Spinner className="w-8 h-8" />
+                </Card>
             </div>
         )
     }
