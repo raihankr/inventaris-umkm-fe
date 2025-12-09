@@ -1,5 +1,3 @@
-"use client" // Menandakan bahwa ini adalah komponen client-side
-
 import { TrendingUp } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 
@@ -18,35 +16,38 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-// Contoh data penjualan bulanan
+// DATA DUA METRIK
 const chartData = [
-  { month: "Jan", penjualan: 120 },
-  { month: "Feb", penjualan: 180 },
-  { month: "Mar", penjualan: 150 },
-  { month: "Apr", penjualan: 220 },
-  { month: "Mei", penjualan: 200 },
-  { month: "Jun", penjualan: 260 },
+  { month: "Jan", penjualan: 120, pembelian: 90 },
+  { month: "Feb", penjualan: 180, pembelian: 140 },
+  { month: "Mar", penjualan: 150, pembelian: 110 },
+  { month: "Apr", penjualan: 220, pembelian: 170 },
+  { month: "Mei", penjualan: 200, pembelian: 160 },
+  { month: "Jun", penjualan: 260, pembelian: 210 },
 ]
 
-// Konfigurasi warna untuk chart penjualan
+// CONFIG DUA WARNA
 const chartConfig = {
   penjualan: {
     label: "Penjualan",
-    color: "var(--chart-1)",
+    color: "var(--chart-1)", // BIRU
+  },
+  pembelian: {
+    label: "Pembelian",
+    color: "var(--chart-2)", // BIRU MUDA
   },
 }
 
-// widget ChartPenjualan.jsx
 export default function ChartPenjualan() {
   return (
     <Card>
-      {/* Header Judul */}
       <CardHeader>
-        <CardTitle>Tren Penjualan</CardTitle>
-        <CardDescription>Perkembangan penjualan 6 bulan terakhir</CardDescription>
+        <CardTitle>Tren Penjualan & Pembelian</CardTitle>
+        <CardDescription>
+          Perbandingan 6 bulan terakhir
+        </CardDescription>
       </CardHeader>
 
-      {/* Area Chart */}
       <CardContent>
         <ChartContainer config={chartConfig}>
           <AreaChart
@@ -54,10 +55,8 @@ export default function ChartPenjualan() {
             margin={{ left: 12, right: 12 }}
             accessibilityLayer
           >
-            {/* Grid */}
             <CartesianGrid vertical={false} />
 
-            {/* Sumbu X */}
             <XAxis
               dataKey="month"
               tickLine={false}
@@ -65,13 +64,12 @@ export default function ChartPenjualan() {
               tickMargin={8}
             />
 
-            {/* Tooltip */}
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent indicator="line" />}
             />
 
-            {/* Area Melengkung */}
+            {/* AREA PENJUALAN (BIRU) */}
             <Area
               dataKey="penjualan"
               type="natural"
@@ -80,14 +78,24 @@ export default function ChartPenjualan() {
               stroke="var(--color-penjualan)"
               strokeWidth={2}
             />
+
+            {/* AREA PEMBELIAN (MERAH) */}
+            <Area
+              dataKey="pembelian"
+              type="natural"
+              fill="var(--color-pembelian)"
+              fillOpacity={0.35}
+              stroke="var(--color-pembelian)"
+              strokeWidth={2}
+            />
+
           </AreaChart>
         </ChartContainer>
       </CardContent>
 
-      {/* Footer Info */}
       <CardFooter>
         <div className="flex items-center gap-2 text-sm">
-          <span className="font-medium">Naik 12% bulan ini</span>
+          <span className="font-medium">Penjualan lebih tinggi dari pembelian</span>
           <TrendingUp className="h-4 w-4" />
         </div>
       </CardFooter>

@@ -4,7 +4,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { apiPost } from "../../lib/api.js";
 import { useAuth } from "../../contexts/AuthContext.js";
 import LoadingPage from "../Loading/loading.jsx";
-import { useTheme } from "../../contexts/ThemeContext.jsx"; // ⬅️ add this
+import { useTheme } from "../../contexts/ThemeContext.jsx";
+import LoginImage from "@/assets/image/login-image.jpg";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -173,12 +174,11 @@ export default function LoginPage() {
               disabled={loading}
               className={`
                 block w-full text-center py-2 rounded-lg transition-all
-                ${
-                  loading
-                    ? "bg-gray-400 cursor-not-allowed text-white"
-                    : darkMode
-                      ? "bg-white text-black"
-                      : "bg-black text-white"
+                ${loading
+                  ? "bg-gray-400 cursor-not-allowed text-white"
+                  : darkMode
+                    ? "bg-white text-black"
+                    : "bg-black text-white"
                 }
               `}
             >
@@ -188,14 +188,21 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* RIGHT - INFO PANEL */}
+      {/* RIGHT - IMAGE PANEL (B&W + Transparent) */}
       <div
-        className={`
-          hidden md:flex flex-1 items-center justify-center p-10
-          ${darkMode ? "bg-neutral-900 text-white" : "bg-black text-white"}
-        `}
+        className="hidden md:flex flex-1 items-center justify-center relative"
+        style={{
+          backgroundImage: `url(${LoginImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "grayscale(100%)",
+        }}
       >
-        <div className="max-w-md">
+        {/* Transparent overlay */}
+        <div className="absolute inset-0 bg-black/60" />
+
+        {/* Text di atas gambar */}
+        <div className="relative z-10 text-center text-white px-8">
           <h2 className="text-4xl font-bold mb-4">FaStock</h2>
           <p className="text-lg opacity-90">
             Sistem inventaris sederhana untuk membantu UMKM mengelola barang,

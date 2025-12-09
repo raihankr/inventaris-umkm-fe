@@ -35,7 +35,7 @@ export default function Dashboard() {
           </div>
 
           {/* Widget Transaksi Terbaru (Lebar 2 Kolom) */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <WidgetTransaksiTerbaru />
           </div>
 

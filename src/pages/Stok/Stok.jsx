@@ -1,40 +1,94 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, Package, AlertTriangle, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTheme } from "../../contexts/ThemeContext";
+import api, { apiDelete, apiPost, apiGet, apiPatch } from '@/lib/api';
 
 export default function StokUMKM() {
   const { darkMode: isDark } = useTheme();
 
-  const [stokBarang, setStokBarang] = useState([
-    { id: 1, nama: 'Kemeja Batik', kategori: 'Pakaian', stok: 45, harga: 150000, satuan: 'pcs', minimal: 10 },
-    { id: 2, nama: 'Keripik Singkong', kategori: 'Makanan', stok: 120, harga: 15000, satuan: 'pack', minimal: 20 },
-    { id: 3, nama: 'Tas Anyaman', kategori: 'Kerajinan', stok: 8, harga: 85000, satuan: 'pcs', minimal: 20 },
-    { id: 4, nama: 'Kopi Arabika', kategori: 'Minuman', stok: 3, harga: 45000, satuan: 'pack', minimal: 15 },
-    { id: 5, nama: 'Sarung Tenun', kategori: 'Pakaian', stok: 0, harga: 200000, satuan: 'pcs', minimal: 5 },
-  ]);
+  // --- state ---
+  const [stokBarang, setStokBarang] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
   const [formData, setFormData] = useState({
-    nama: '',
-    kategori: '',
-    stok: '',
-    harga: '',
-    satuan: '',
-    minimal: ''
+    sku: "",
+    id_category: "",
+    deskripsi: "",
+    nama: "",
+    stok: "",
+    harga: "",
+    satuan: "",
+    minimal: "",
   });
 
+  // --- fetch categories (separate useEffect) ---
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await apiGet("/categories");
+        // try common response shapes
+        const list = res?.data?.data ?? res?.data ?? [];
+        setCategories(Array.isArray(list) ? list : []);
+      } catch (err) {
+        console.error("FETCH CATEGORY ERROR:", err);
+        setCategories([]);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // --- fetch products (separate useEffect) ---
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await apiGet("/products");
+        // products may be nested res.data.data.data in your API
+        const products = res?.data?.data?.data ?? res?.data?.data ?? res?.data ?? [];
+        const mapped = (Array.isArray(products) ? products : []).map(item => ({
+          id: item.id_product ?? item.id ?? item._id ?? Date.now().toString(),
+          nama: item.name ?? item.nama ?? '',
+          // categories from product may be string or object or array — normalize to a readable string
+          kategori: Array.isArray(item.categories)
+            ? item.categories.map(c => c.category || c.name || '').join(', ')
+            : (typeof item.categories === 'object' && item.categories !== null)
+              ? (item.categories.category || item.categories.name || '')
+              : (item.categories ?? item.categories ?? ''),
+          id_category: item.id_category ?? (Array.isArray(item.categories) && item.categories[0]?.id_category) ?? '',
+          stok: Number(item.total_stock ?? item.stocks?.reduce((s, st) => s + (Number(st.amount) || 0), 0) ?? 0),
+          harga: Number(item.stocks?.[0]?.price ?? 0),
+          satuan: item.unit ?? item.satuan ?? '',
+          minimal: Number(item.minimum ?? item.stock_minimum ?? 0),
+          sku: item.SKU ?? item.sku ?? '',
+          deskripsi: item.description ?? item.deskripsi ?? '',
+          status: item.status ?? ( (Number(item.total_stock ?? 0) > 0) ? 'Tersedia' : 'Habis' ),
+        }));
+
+        setStokBarang(mapped);
+      } catch (err) {
+        console.error("FETCH PRODUCTS ERROR:", err);
+        setStokBarang([]);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // --- helpers ---
   const getStatus = (stok, minimal) => {
-    if (stok === 0) {
+    if ((Number(stok) || 0) === 0) {
       return {
         label: 'Habis',
         color: `${isDark ? 'bg-red-900/40 text-red-300 border-red-800' : 'bg-red-500/20 text-red-600 border-red-500/30'}`,
         icon: XCircle
       };
-    } else if (stok <= minimal) {
+    } else if ((Number(stok) || 0) <= (Number(minimal) || 0)) {
       return {
         label: 'Perlu Restock',
         color: `${isDark ? 'bg-yellow-900/40 text-yellow-300 border-yellow-800' : 'bg-yellow-500/20 text-yellow-600 border-yellow-500/30'}`,
@@ -57,73 +111,148 @@ export default function StokUMKM() {
   };
 
   const stats = getStatsData();
-
-  const totalNilai = stokBarang.reduce((total, item) => total + (item.stok * item.harga), 0);
+  const totalNilai = stokBarang.reduce((total, item) => total + ((Number(item.stok) || 0) * (Number(item.harga) || 0)), 0);
 
   const filteredStok = stokBarang.filter(item => {
     const term = searchTerm.trim().toLowerCase();
     if (!term) return true;
-    const namaMatch = item.nama.toLowerCase().includes(term);
-    const kategoriMatch = item.kategori.toLowerCase().includes(term);
+    const namaMatch = (item.nama || '').toString().toLowerCase().includes(term);
+    const kategoriMatch = (item.kategori || '').toString().toLowerCase().includes(term);
     return namaMatch || kategoriMatch;
   });
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredStok.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredStok.length / itemsPerPage) || 1;
+  const totalPages = Math.max(1, Math.ceil(filteredStok.length / itemsPerPage));
 
   const handlePageChange = (pageNumber) => {
     if (pageNumber < 1 || pageNumber > totalPages) return;
     setCurrentPage(pageNumber);
   };
 
-  const handleSubmit = () => {
-    // basic validation
-    if (!formData.nama || !formData.kategori || formData.stok === '' || formData.stok === null ||
-        formData.harga === '' || formData.satuan === '' || formData.minimal === '') {
+  // --- submit (create / update) ---
+  const handleSubmit = async () => {
+    // validate required fields (use id_category, not free-text kategori)
+    if (
+      !formData.nama ||
+      !formData.id_category ||
+      formData.stok === '' ||
+      formData.harga === '' ||
+      formData.satuan === '' ||
+      formData.minimal === ''
+    ) {
       alert('Mohon lengkapi semua field');
       return;
     }
 
-    // normalize numeric fields
     const normalized = {
-      ...formData,
-      stok: Number(formData.stok),
-      harga: Number(formData.harga),
-      minimal: Number(formData.minimal)
+      SKU: formData.sku || `SKU-${Date.now()}`, // auto gen if empty
+      id_category: formData.id_category,
+      description: formData.deskripsi || "Tidak ada deskripsi",
+      name: formData.nama,
+      unit: formData.satuan,
+      minimum: Number(formData.minimal),
+      isActive: true
     };
 
-    if (editingId) {
-      const updatedStok = stokBarang.map(item => item.id === editingId ? { ...normalized, id: editingId } : item);
-      setStokBarang(updatedStok);
-    } else {
-      const newItem = { ...normalized, id: Date.now() };
-      setStokBarang(prev => [...prev, newItem]);
-      // move to last page to show newly added item
-      const newTotal = filteredStok.length + 1;
-      const newPages = Math.ceil(newTotal / itemsPerPage);
-      setCurrentPage(newPages);
+    try {
+      if (editingId) {
+        // update
+        const response = await apiPatch(`/products/${editingId}`, normalized);
+        const respData = response?.data ?? {};
+        // update local state - keep UI fields consistent
+        setStokBarang(prev => prev.map(it => {
+          if (it.id !== editingId) return it;
+          const catName = categories.find(c => (c.id_category ?? c.id) === normalized.id_category)?.category ?? categories.find(c => (c.id_category ?? c.id) === normalized.id_category)?.name ?? it.kategori;
+          return {
+            ...it,
+            nama: normalized.name,
+            deskripsi: normalized.description,
+            satuan: normalized.unit,
+            minimal: normalized.minimum,
+            id_category: normalized.id_category,
+            kategori: catName,
+            sku: normalized.SKU,
+            // stok & harga come from formData
+            stok: Number(formData.stok) || 0,
+            harga: Number(formData.harga) || 0,
+          };
+        }));
+      } else {
+        // create
+        const response = await apiPost("/products", normalized);
+        const resp = response?.data ?? {};
+        // try to get id from various possible response shapes
+        const newId = resp?.id_product ?? resp?.data?.id_product ?? resp?.data?.id ?? resp?.id ?? Date.now().toString();
+
+        const catName = categories.find(c => (c.id_category ?? c.id) === normalized.id_category)?.category ?? categories.find(c => (c.id_category ?? c.id) === normalized.id_category)?.name ?? "";
+
+        const newItem = {
+          id: newId,
+          nama: normalized.name,
+          kategori: catName,
+          id_category: normalized.id_category,
+          stok: Number(formData.stok) || 0,
+          harga: Number(formData.harga) || 0,
+          satuan: normalized.unit,
+          minimal: normalized.minimum,
+          sku: normalized.SKU,
+          deskripsi: normalized.description,
+          status: (Number(formData.stok) || 0) > 0 ? 'Tersedia' : 'Habis'
+        };
+
+        setStokBarang(prev => [...prev, newItem]);
+      }
+    } catch (error) {
+      console.error("Gagal simpan:", error);
+      alert("Gagal terhubung ke API");
     }
 
+    // reset
     setShowModal(false);
     setEditingId(null);
-    setFormData({ nama: '', kategori: '', stok: '', harga: '', satuan: '', minimal: '' });
+    setFormData({
+      sku: "",
+      id_category: "",
+      deskripsi: "",
+      nama: "",
+      stok: "",
+      harga: "",
+      satuan: "",
+      minimal: "",
+    });
   };
 
+  // --- edit handler ---
   const handleEdit = (item) => {
-    setFormData({ ...item });
+    setFormData({
+      sku: item.sku ?? "",
+      id_category: item.id_category ?? "",
+      deskripsi: item.deskripsi ?? "",
+      nama: item.nama ?? "",
+      stok: item.stok ?? "",
+      harga: item.harga ?? "",
+      satuan: item.satuan ?? "",
+      minimal: item.minimal ?? "",
+    });
     setEditingId(item.id);
     setShowModal(true);
   };
 
-  const handleDelete = (id) => {
-    if (confirm('Yakin ingin menghapus barang ini?')) {
+  // --- delete handler ---
+  const handleDelete = async (id) => {
+    if (!confirm('Yakin ingin menghapus barang ini?')) return;
+
+    try {
+      await apiDelete(`/products/${id}`);
       setStokBarang(prev => prev.filter(item => item.id !== id));
-      // adjust page if needed
       const newFiltered = filteredStok.length - 1;
-      const newPages = Math.ceil(newFiltered / itemsPerPage) || 1;
+      const newPages = Math.ceil(Math.max(0, newFiltered) / itemsPerPage) || 1;
       if (currentPage > newPages) setCurrentPage(newPages);
+    } catch (error) {
+      console.error("Gagal hapus produk:", error);
+      alert("Gagal menghapus produk");
     }
   };
 
@@ -132,9 +261,19 @@ export default function StokUMKM() {
   const handleTambahBarang = () => {
     setShowModal(true);
     setEditingId(null);
-    setFormData({ nama: '', kategori: '', stok: '', harga: '', satuan: '', minimal: '' });
+    setFormData({
+      sku: "",
+      id_category: "",
+      deskripsi: "",
+      nama: "",
+      stok: "",
+      harga: "",
+      satuan: "",
+      minimal: "",
+    });
   };
 
+  // --- render ---
   return (
     <div className={`min-h-screen p-4 sm:p-6 transition-colors duration-200
       ${'bg-[--background] text-[--foreground]'}
@@ -432,7 +571,6 @@ export default function StokUMKM() {
           </div>
         </div>
               
-
           {/* Pagination area */}
           {filteredStok.length > itemsPerPage && (
             <div className={`mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${isDark ? 'bg-gray-800 border-t border-gray-700' : 'bg-white'} p-4`}>
@@ -494,13 +632,18 @@ export default function StokUMKM() {
 
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Kategori</label>
-                  <input
-                    type="text"
-                    value={formData.kategori}
-                    onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
+                  <select
+                    value={formData.id_category}
+                    onChange={(e) => setFormData({ ...formData, id_category: e.target.value })}
                     className={`w-full rounded-lg px-4 py-2 transition-all ${isDark ? 'bg-gray-700 border border-gray-600 text-gray-100' : 'bg-white border-2 border-gray-300 text-gray-800'}`}
-                    placeholder="Contoh: Pakaian"
-                  />
+                  >
+                    <option value="">-- Pilih Kategori --</option>
+                    {categories.map(cat => (
+                      <option key={cat.id_category ?? cat.id} value={cat.id_category ?? cat.id}>
+                        {cat.category ?? cat.categories ?? cat.name ?? ''}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -557,7 +700,7 @@ export default function StokUMKM() {
 
               </div>
             </div>
-          </div> 
+          </div>
         )}
 
         {/* Pagination khusus mobile */}
