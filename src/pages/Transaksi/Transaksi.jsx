@@ -69,7 +69,7 @@ export default function TransaksiUMKM() {
   const formatTanggal = (t) => new Date(t).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 sm:p-6">
+    <div className="min-h-screen bg-background p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 sm:mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-gray-800 to-black dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
@@ -142,9 +142,7 @@ export default function TransaksiUMKM() {
                 <tr>
                   <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold">Tanggal</th>
                   <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold">Jenis</th>
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold">Barang</th>
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold">Jumlah</th>
-                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm font-semibold">Harga Satuan</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold">Pelaku</th>
                   <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm font-semibold">Total</th>
                 </tr>
               </thead>
@@ -173,14 +171,11 @@ export default function TransaksiUMKM() {
                       <div className="font-medium text-gray-800 dark:text-gray-200 text-xs sm:text-base">{item.barang}</div>
                       {item.keterangan && <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{item.keterangan}</div>}
                     </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                      <span className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">{item.jumlah}</span>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
+                      <span className="text-sm sm:text-lg font-bold text-gray-900 dark:text-gray-100">{formatRupiah(item.total)}</span>
                     </td>
                     <td className="px-3 sm:px-6 py-3 sm:py-4 text-right font-medium text-gray-800 dark:text-gray-200 text-xs sm:text-base">
                       {formatRupiah(item.harga)}
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
-                      <span className="text-sm sm:text-lg font-bold text-gray-900 dark:text-gray-100">{formatRupiah(item.total)}</span>
                     </td>
                   </tr>
                 ))}
