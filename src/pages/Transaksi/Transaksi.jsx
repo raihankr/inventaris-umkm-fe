@@ -144,6 +144,7 @@ export default function TransaksiUMKM() {
                   <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold">Jenis</th>
                   <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold">Pelaku</th>
                   <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm font-semibold">Total</th>
+                  <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm font-semibold">Aksi</th>
                 </tr>
               </thead>
               

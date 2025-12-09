@@ -24,7 +24,7 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [errors, dispatchErrors] = useReducer(ObjectReducer, {});
   const [popup, showPopup] = useState(false);
-  const [popupAction, setPopupAction] = useState(() => {});
+  const [popupAction, setPopupAction] = useState(() => { });
   const [popupTitle, setPopupTitle] = useState("");
   const [popupMessage, setPopupMessage] = useState("");
   const [popupYes, setPopupYes] = useState(null);
@@ -78,9 +78,8 @@ export default function Users() {
         }
       },
       search ? 500 : 0,
-    ); // Cari user setelah 0.5 detik tidak mengetik
+    );
 
-    // Cleanup function - batalkan mencari jika kata kunci pencarian berganti (user mengetik)
     return () => clearTimeout(debounceTimer);
   }, [search, setSearchParams, currentPage, limit]);
 
@@ -89,16 +88,14 @@ export default function Users() {
   }, [fetchData]);
 
   useEffect(() => {
-    // Set up the debounce timer
     const debounceTimer = setTimeout(() => {
       setSearchParams((prev) => {
         const newParams = new URLSearchParams(prev);
         newParams.set("search", search.trim());
         return newParams;
       });
-    }, 500); // Wait 500ms after user stops typing
+    }, 500);
 
-    // Cleanup function - cancels the timer if searchTerm changes
     return () => clearTimeout(debounceTimer);
   });
 
@@ -142,7 +139,6 @@ export default function Users() {
         });
         dispatchErrors({ type: "put", data: fieldErrors });
       } else {
-        // fallback async Yup error
         dispatchErrors({ type: "put", data: { form: err.message } });
       }
     }
@@ -167,17 +163,16 @@ export default function Users() {
 
   const handleTambahUser = () => {
     setShowModal(true);
-    // kosongkan pesan error
     dispatchErrors({ type: "put", data: {} });
   };
 
   return (
-    <div className="min-h-screen p-3 sm:p-6" style={{ background: "var(--background)" }}>
+    <div className="min-h-screen p-3 sm:p-6 bg-background">
       {popup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div
             className={`px-8 py-6 rounded-xl shadow-xl text-center max-w-sm
-              ${darkMode ? "bg-card text-card-foreground" : "bg-card text-card-foreground"}`}
+              ${darkMode ? "bg-card text-card-foreground" : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"}`}
           >
             <h2 className="text-xl font-semibold mb-2">{popupTitle}</h2>
             <p>{popupMessage || "Harap login untuk melanjutkan."}</p>
@@ -187,7 +182,7 @@ export default function Users() {
                   showPopup(false);
                   window.history.replaceState({}, "");
                 }}
-                className={`mt-4 px-4 py-2 rounded-lg ${darkMode ? "bg-secondary hover:bg-secondary/80 text-secondary-foreground" : "bg-secondary hover:bg-secondary/80 text-secondary-foreground"}`}
+                className={`mt-4 px-4 py-2 rounded-lg ${darkMode ? "bg-secondary hover:bg-secondary/80 text-secondary-foreground" : "bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-100"}`}
               >
                 Batal
               </button>
@@ -203,16 +198,17 @@ export default function Users() {
             </div>
           </div>
         </div>
-      )}{" "}
-      {/* btn tambah barang buat di mobile */}
+      )}
+      
       <button
         onClick={() => {
           setShowModal(true);
         }}
-        className={`sm:hidden fixed bottom-5 right-5 w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-all ${darkMode ? "bg-card text-card-foreground hover:bg-accent" : "bg-card text-card-foreground hover:bg-accent"}`}
+        className={`sm:hidden fixed bottom-5 right-5 w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-all ${darkMode ? "bg-card text-card-foreground hover:bg-accent" : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-gray-300 dark:border-gray-600"}`}
       >
         <Plus size={28} />
       </button>
+      
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className={`text-3xl sm:text-4xl font-bold mb-2 ${darkMode ? "text-white" : "bg-gradient-to-r from-gray-800 to-black bg-clip-text text-transparent"}`}>
@@ -223,7 +219,7 @@ export default function Users() {
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
             <Search
-              className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${darkMode ? "text-muted-foreground" : "text-muted-foreground"}`}
+              className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${darkMode ? "text-muted-foreground" : "text-gray-400 dark:text-gray-500"}`}
               size={20}
             />
             <input
@@ -232,45 +228,45 @@ export default function Users() {
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
-                // Kembali ke page 1 saat searching
                 setCurrentPage(1);
               }}
-              className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground focus:border-primary" : "bg-card border-input text-card-foreground placeholder:text-muted-foreground focus:border-primary"} border-2 rounded-lg pl-12 pr-4 py-2 md:py-3 focus:outline-none transition-all`}
+              className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground focus:border-primary" : "bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-gray-800 dark:focus:border-gray-500"} rounded-lg pl-12 pr-4 py-2 md:py-3 transition-all`}
             />
           </div>
+          
           <button
             onClick={fetchData}
-            className={`${darkMode ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"} px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg`}
+            className={`px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg ${darkMode ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-gray-900 dark:bg-gray-700 hover:bg-black dark:hover:bg-gray-600 text-white"}`}
           >
             <RefreshCw size={20} />
           </button>
 
           <button
             onClick={handleTambahUser}
-            className={`${darkMode ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"} px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg`}
+            className={`px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg ${darkMode ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-gray-900 dark:bg-gray-700 hover:bg-black dark:hover:bg-gray-600 text-white"}`}
           >
             <Plus size={20} />
             Tambah User
           </button>
         </div>
 
-        <div className={`${darkMode ? "bg-card" : "bg-card"} rounded-xl border overflow-hidden shadow-lg`}>
+        <div className={`${darkMode ? "bg-card" : "bg-white dark:bg-gray-800"} rounded-xl border-2 ${darkMode ? "border-border" : "border-gray-300 dark:border-gray-600"} overflow-hidden shadow-lg`}>
           <div className="overflow-x-auto">
             {loading ? (
               <LoadingPage full />
             ) : errors.table ? (
-              <div className={`w-full h-full p-20 flex items-center justify-center ${darkMode ? "text-card-foreground" : "text-card-foreground"}`}>
+              <div className={`w-full h-full p-20 flex items-center justify-center ${darkMode ? "text-card-foreground" : "text-gray-800 dark:text-gray-100"}`}>
                 {errors.table}
               </div>
             ) : (
               <table className="w-full">
-                <thead className={`${darkMode ? "bg-muted" : "bg-muted"}`}>
+                <thead className={`${darkMode ? "bg-muted" : "bg-gradient-to-r from-gray-800 to-black dark:from-gray-700 dark:to-gray-900 text-white"}`}>
                   <tr>
                     {columns.map((column) => {
                       return (
                         <th
                           key={column.name}
-                          className={`px-6 py-4 text-sm font-semibold ${column.className} text-muted-foreground`}
+                          className={`px-6 py-4 text-sm font-semibold ${column.className} ${darkMode ? "text-muted-foreground" : "text-white"}`}
                         >
                           {column.name}
                         </th>
@@ -279,30 +275,35 @@ export default function Users() {
                   </tr>
                 </thead>
 
-                <tbody className={`${darkMode ? "divide-border" : "divide-border"} divide-y`}>
+                <tbody className={`${darkMode ? "divide-border" : "divide-gray-200 dark:divide-gray-700"} divide-y`}>
                   {data.data && data.data.map((user) => {
                     return (
                       <tr
                         key={user.id_user}
-                        className={`${darkMode ? "bg-card hover:bg-accent/50 text-card-foreground" : "bg-card hover:bg-accent/50 text-card-foreground"} transition-colors`}
+                        className={`${darkMode ? "bg-card hover:bg-accent/50 text-card-foreground" : "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-800 dark:text-gray-100"} transition-colors`}
                       >
                         <td className="px-6 py-4">
-                          <div className={`font-medium ${darkMode ? "text-card-foreground" : "text-card-foreground"}`}>
+                          <div className={`font-medium ${darkMode ? "text-card-foreground" : "text-gray-800 dark:text-gray-100"}`}>
                             {user.name}
                           </div>
-                          <div className={`text-sm ${darkMode ? "text-muted-foreground" : "text-muted-foreground"}`}>
+                          <div className={`text-sm ${darkMode ? "text-muted-foreground" : "text-gray-500 dark:text-gray-400"}`}>
                             {user.username}
                           </div>
                         </td>
 
                         <td className="px-6 py-4">
-                          <span className={`px-3 py-1 ${darkMode ? "bg-secondary text-secondary-foreground" : "bg-secondary text-secondary-foreground"} rounded-full text-sm font-medium`}>
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${darkMode
+                                ? "bg-secondary text-secondary-foreground"
+                                : "bg-sky-200 dark:bg-sky-900/30 text-sky-800 dark:text-sky-400"
+                              }`}
+                          >
                             {user.role}
                           </span>
                         </td>
 
                         {["email", "contact", "address"].map((field) => (
-                          <td className={`px-6 py-4 ${darkMode ? "text-card-foreground" : "text-card-foreground"}`} key={field}>
+                          <td className={`px-6 py-4 ${darkMode ? "text-card-foreground" : "text-gray-800 dark:text-gray-100"}`} key={field}>
                             {user[field] || "Tidak ada"}
                           </td>
                         ))}
@@ -311,20 +312,20 @@ export default function Users() {
                           <div className="flex justify-center">
                             <Popover>
                               <PopoverTrigger asChild>
-                                <button className={`${darkMode ? "hover:bg-accent text-card-foreground" : "hover:bg-accent text-card-foreground"} rounded-md p-1`}>
+                                <button className={`rounded-md p-1 ${darkMode ? "hover:bg-accent text-card-foreground" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"}`}>
                                   <EllipsisVertical />
                                 </button>
                               </PopoverTrigger>
                               <PopoverContent className="w-40 p-2">
-                                <div className={`flex flex-col space-y-1 ${darkMode ? "bg-card border-border text-card-foreground" : "bg-card border-border text-card-foreground"} shadow-xl border rounded-md p-2`}>
+                                <div className={`flex flex-col space-y-1 ${darkMode ? "bg-card border-border text-card-foreground" : "bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100"} shadow-xl border rounded-md p-2`}>
                                   <button
-                                    className={`px-3 py-2 text-red-500 rounded-md ${darkMode ? "hover:bg-accent" : "hover:bg-accent"} text-sm text-left w-full`}
+                                    className={`px-3 py-2 text-red-500 rounded-md ${darkMode ? "hover:bg-accent" : "hover:bg-gray-100 dark:hover:bg-gray-700"} text-sm text-left w-full`}
                                     onClick={() => handleDelete(user.id_user)}
                                   >
                                     Hapus
                                   </button>
                                   <button
-                                    className={`px-3 py-2 rounded-md ${darkMode ? "hover:bg-accent text-card-foreground" : "hover:bg-accent text-card-foreground"} text-sm text-left w-full`}
+                                    className={`px-3 py-2 rounded-md ${darkMode ? "hover:bg-accent text-card-foreground" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-100"} text-sm text-left w-full`}
                                   >
                                     Reset password
                                   </button>
@@ -343,8 +344,8 @@ export default function Users() {
         </div>
 
         {data.total_page > 1 && (
-          <div className={`mt-6 flex items-center justify-between ${darkMode ? "bg-card border-border text-card-foreground" : "bg-card border-border text-card-foreground"} rounded-xl border p-4`}>
-            <div className={`text-sm ${darkMode ? "text-muted-foreground" : "text-muted-foreground"}`}>
+          <div className={`mt-6 flex items-center justify-between ${darkMode ? "bg-card border-border text-card-foreground" : "bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100"} rounded-xl border p-4`}>
+            <div className={`text-sm ${darkMode ? "text-muted-foreground" : "text-gray-600 dark:text-gray-400"}`}>
               Menampilkan {data.limit * (data.page - 1) + 1} -{" "}
               {data.limit * data.page} dari {data.count} user
             </div>
@@ -353,11 +354,10 @@ export default function Users() {
               <button
                 onClick={() => handlePageChange(data.page - 1)}
                 disabled={data.page === 1}
-                className={`p-2 rounded-lg transition-all ${
-                  data.page === 1
-                    ? `${darkMode ? "bg-muted text-muted-foreground" : "bg-muted text-muted-foreground"} cursor-not-allowed`
-                    : `${darkMode ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"}`
-                }`}
+                className={`p-2 rounded-lg transition-all ${data.page === 1
+                    ? `${darkMode ? "bg-muted text-muted-foreground" : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-600"} cursor-not-allowed`
+                    : `${darkMode ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-gray-800 dark:bg-gray-700 hover:bg-black dark:hover:bg-gray-600 text-white"}`
+                  }`}
               >
                 <ChevronLeft size={20} />
               </button>
@@ -369,11 +369,10 @@ export default function Users() {
                     <button
                       key={pageNumber}
                       onClick={() => handlePageChange(pageNumber)}
-                      className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                        data.page === pageNumber
-                          ? `${darkMode ? "bg-primary text-primary-foreground" : "bg-primary text-primary-foreground"}`
-                          : `${darkMode ? "bg-muted text-muted-foreground hover:bg-accent" : "bg-muted text-muted-foreground hover:bg-accent"}`
-                      }`}
+                      className={`px-4 py-2 rounded-lg font-semibold transition-all ${data.page === pageNumber
+                          ? `${darkMode ? "bg-primary text-primary-foreground" : "bg-gray-900 dark:bg-gray-700 text-white"}`
+                          : `${darkMode ? "bg-muted text-muted-foreground hover:bg-accent" : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"}`
+                        }`}
                     >
                       {pageNumber}
                     </button>
@@ -384,11 +383,10 @@ export default function Users() {
               <button
                 onClick={() => handlePageChange(data.page + 1)}
                 disabled={data.page == data.total_page}
-                className={`p-2 rounded-lg transition-all ${
-                  data.page === data.total_page
-                    ? `${darkMode ? "bg-muted text-muted-foreground" : "bg-muted text-muted-foreground"} cursor-not-allowed`
-                    : `${darkMode ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"}`
-                }`}
+                className={`p-2 rounded-lg transition-all ${data.page === data.total_page
+                    ? `${darkMode ? "bg-muted text-muted-foreground" : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-600"} cursor-not-allowed`
+                    : `${darkMode ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-gray-800 dark:bg-gray-700 hover:bg-black dark:hover:bg-gray-600 text-white"}`
+                  }`}
               >
                 <ChevronRight size={20} />
               </button>
@@ -398,9 +396,9 @@ export default function Users() {
 
         {showResetPw && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 ">
-            <div className={`${darkMode ? "bg-card border-border text-card-foreground" : "bg-card border-border text-card-foreground"} rounded-xl border p-6 w-full max-w-md shadow-2xl max-h-[80vh]`}>
+            <div className={`${darkMode ? "bg-card border-border text-card-foreground" : "bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100"} rounded-xl border p-6 w-full max-w-md shadow-2xl max-h-[80vh]`}>
               <h2 className="text-2xl font-bold mb-6">
-                Tambah Pengguna Baru
+                Reset Password
               </h2>
 
               <form
@@ -410,13 +408,13 @@ export default function Users() {
                 className="space-y-4"
               >
                 <div>
-                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-card-foreground"} mb-2`}>
+                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-gray-700 dark:text-gray-300"} mb-2`}>
                     Password*
                   </label>
                   <input
                     type="password"
                     name="password"
-                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-card border-input text-card-foreground placeholder:text-muted-foreground"} border-2 rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-primary"}`}
+                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"} rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-gray-800 dark:focus:border-gray-500"}`}
                     placeholder="Password"
                   />
                   {errors.password && (
@@ -425,13 +423,13 @@ export default function Users() {
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-card-foreground"} mb-2`}>
+                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-gray-700 dark:text-gray-300"} mb-2`}>
                     Konfirmasi Password*
                   </label>
                   <input
                     type="password"
                     name="confirm_password"
-                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-card border-input text-card-foreground placeholder:text-muted-foreground"} border-2 rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-primary"}`}
+                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"} rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-gray-800 dark:focus:border-gray-500"}`}
                     placeholder="Password"
                   />
                   {errors.confirm_password && (
@@ -443,13 +441,13 @@ export default function Users() {
                 <div className="flex gap-3 mt-6">
                   <button
                     type="submit"
-                    className={`flex-1 ${darkMode ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"} py-2 rounded-lg font-semibold transition-all`}
+                    className={`flex-1 ${darkMode ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-gray-900 dark:bg-gray-700 hover:bg-black dark:hover:bg-gray-600 text-white"} py-2 rounded-lg font-semibold transition-all`}
                   >
                     Simpan
                   </button>
                   <button
                     onClick={() => setShowModal(false)}
-                    className={`flex-1 ${darkMode ? "bg-secondary hover:bg-secondary/80 text-secondary-foreground" : "bg-secondary hover:bg-secondary/80 text-secondary-foreground"} py-2 rounded-lg font-semibold transition-all`}
+                    className={`flex-1 ${darkMode ? "bg-secondary hover:bg-secondary/80 text-secondary-foreground" : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-100"} py-2 rounded-lg font-semibold transition-all`}
                   >
                     Batal
                   </button>
@@ -461,7 +459,7 @@ export default function Users() {
 
         {showModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className={`${darkMode ? "bg-card border-border text-card-foreground" : "bg-card border-border text-card-foreground"} rounded-xl border p-6 w-full max-w-md shadow-2xl max-h-[80vh] overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']`}>
+            <div className={`${darkMode ? "bg-card border-border text-card-foreground" : "bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100"} rounded-xl border p-6 w-full max-w-md shadow-2xl max-h-[80vh] overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']`}>
               <h2 className="text-2xl font-bold mb-6">
                 Tambah Pengguna Baru
               </h2>
@@ -473,13 +471,13 @@ export default function Users() {
                 className="space-y-4"
               >
                 <div>
-                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-card-foreground"} mb-2`}>
+                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-gray-700 dark:text-gray-300"} mb-2`}>
                     Username*
                   </label>
                   <input
                     type="text"
                     name="username"
-                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-card border-input text-card-foreground placeholder:text-muted-foreground"} border-2 rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-primary"}`}
+                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"} rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-gray-800 dark:focus:border-gray-500"}`}
                     placeholder="johndoe"
                   />
                   {errors.username && (
@@ -488,13 +486,13 @@ export default function Users() {
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-card-foreground"} mb-2`}>
+                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-gray-700 dark:text-gray-300"} mb-2`}>
                     Nama Pengguna*
                   </label>
                   <input
                     type="text"
                     name="name"
-                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-card border-input text-card-foreground placeholder:text-muted-foreground"} border-2 rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-primary"}`}
+                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"} rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-gray-800 dark:focus:border-gray-500"}`}
                     placeholder="John Doe"
                   />
                   {errors.name && (
@@ -503,12 +501,12 @@ export default function Users() {
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-card-foreground"} mb-2`}>
+                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-gray-700 dark:text-gray-300"} mb-2`}>
                     Role*
                   </label>
                   <select
                     name="role"
-                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground" : "bg-card border-input text-card-foreground"} border-2 rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-primary"}`}
+                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground" : "bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100"} rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-gray-800 dark:focus:border-gray-500"}`}
                     placeholder="0"
                     min="0"
                   >
@@ -521,13 +519,13 @@ export default function Users() {
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-card-foreground"} mb-2`}>
+                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-gray-700 dark:text-gray-300"} mb-2`}>
                     Email*
                   </label>
                   <input
                     type="email"
                     name="email"
-                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-card border-input text-card-foreground placeholder:text-muted-foreground"} border-2 rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-primary"}`}
+                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"} rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-gray-800 dark:focus:border-gray-500"}`}
                     placeholder="johndoe@example.com"
                   />
                   {errors.email && (
@@ -536,13 +534,13 @@ export default function Users() {
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-card-foreground"} mb-2`}>
+                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-gray-700 dark:text-gray-300"} mb-2`}>
                     Password*
                   </label>
                   <input
                     type="password"
                     name="password"
-                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-card border-input text-card-foreground placeholder:text-muted-foreground"} border-2 rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-primary"}`}
+                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"} rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-gray-800 dark:focus:border-gray-500"}`}
                     placeholder="Password"
                   />
                   {errors.password && (
@@ -551,13 +549,13 @@ export default function Users() {
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-card-foreground"} mb-2`}>
+                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-gray-700 dark:text-gray-300"} mb-2`}>
                     Konfirmasi Password*
                   </label>
                   <input
                     type="password"
                     name="confirm_password"
-                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-card border-input text-card-foreground placeholder:text-muted-foreground"} border-2 rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-primary"}`}
+                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"} rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-gray-800 dark:focus:border-gray-500"}`}
                     placeholder="Password"
                   />
                   {errors.confirm_password && (
@@ -568,13 +566,13 @@ export default function Users() {
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-card-foreground"} mb-2`}>
+                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-gray-700 dark:text-gray-300"} mb-2`}>
                     No. Telepon/Kontak
                   </label>
                   <input
                     type="string"
                     name="contact"
-                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-card border-input text-card-foreground placeholder:text-muted-foreground"} border-2 rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-primary"}`}
+                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"} rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-gray-800 dark:focus:border-gray-500"}`}
                     placeholder="6281234567890"
                   />
                   {errors.contact && (
@@ -583,12 +581,12 @@ export default function Users() {
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-card-foreground"} mb-2`}>
+                  <label className={`block text-sm font-medium ${darkMode ? "text-card-foreground" : "text-gray-700 dark:text-gray-300"} mb-2`}>
                     Alamat
                   </label>
                   <textarea
                     name="address"
-                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-card border-input text-card-foreground placeholder:text-muted-foreground"} border-2 rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-primary"}`}
+                    className={`w-full ${darkMode ? "bg-card border-input text-card-foreground placeholder:text-muted-foreground" : "bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"} rounded-lg px-4 py-2 focus:outline-none ${darkMode ? "focus:border-primary" : "focus:border-gray-800 dark:focus:border-gray-500"}`}
                     placeholder="Jl. Apel No. 9"
                   />
                   {errors.address && (
@@ -599,13 +597,13 @@ export default function Users() {
                 <div className="flex gap-3 mt-6">
                   <button
                     type="submit"
-                    className={`flex-1 ${darkMode ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"} py-2 rounded-lg font-semibold transition-all`}
+                    className={`flex-1 ${darkMode ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "bg-gray-900 dark:bg-gray-700 hover:bg-black dark:hover:bg-gray-600 text-white"} py-2 rounded-lg font-semibold transition-all`}
                   >
                     Simpan
                   </button>
                   <button
                     onClick={() => setShowModal(false)}
-                    className={`flex-1 ${darkMode ? "bg-secondary hover:bg-secondary/80 text-secondary-foreground" : "bg-secondary hover:bg-secondary/80 text-secondary-foreground"} py-2 rounded-lg font-semibold transition-all`}
+                    className={`flex-1 ${darkMode ? "bg-secondary hover:bg-secondary/80 text-secondary-foreground" : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-100"} py-2 rounded-lg font-semibold transition-all`}
                   >
                     Batal
                   </button>

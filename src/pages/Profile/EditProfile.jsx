@@ -22,7 +22,7 @@ export default function EditProfile({ onUpdate, onClose }) {
   // State untuk error validasi (pake yup di validateprofile.jsx)
   const [errors, setErrors] = useState({});
 
-  // Ref untuk input file
+  // Ref untuk input file avatar
   const fileInputRef = useRef(null);
 
   // Handler untuk perubahan file avatar
