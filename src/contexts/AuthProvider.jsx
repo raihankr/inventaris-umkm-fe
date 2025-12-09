@@ -58,7 +58,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    console.log("check auth status");
     fetchAuthStatus();
   }, []); // Run once on component mount
 

@@ -57,8 +57,6 @@ export default function AppSidebar() {
     { icon: StokLogo, label: "Stok Barang", href: "/stok" },
   ];
 
-  console.dir(userInfo);
-
   if (userInfo.role === "admin")
     menuItems.push({ icon: UserLogo, label: "Manajemen User", href: "/users" });
   // Ambil data user dari context
