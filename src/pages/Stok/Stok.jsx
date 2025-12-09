@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Search, Package, AlertTriangle, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTheme } from "../../contexts/ThemeContext";
+import { Plus, Edit2, Trash2, Search, Package, AlertTriangle, XCircle, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 export default function StokUMKM() {
   const { darkMode: isDark } = useTheme();
@@ -19,12 +19,7 @@ export default function StokUMKM() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [formData, setFormData] = useState({
-    nama: '',
-    kategori: '',
-    stok: '',
-    harga: '',
-    satuan: '',
-    minimal: ''
+    nama: '', kategori: '', stok: '', harga: '', satuan: '', minimal: ''
   });
 
   const getStatus = (stok, minimal) => {
@@ -106,9 +101,7 @@ export default function StokUMKM() {
       setCurrentPage(newPages);
     }
 
-    setShowModal(false);
-    setEditingId(null);
-    setFormData({ nama: '', kategori: '', stok: '', harga: '', satuan: '', minimal: '' });
+    closeModal();
   };
 
   const handleEdit = (item) => {
@@ -127,13 +120,19 @@ export default function StokUMKM() {
     }
   };
 
-  const formatRupiah = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingId(null);
+    setFormData({ nama: '', kategori: '', stok: '', harga: '', satuan: '', minimal: '' });
+  };
 
-  const handleTambahBarang = () => {
+  const openModal = () => {
     setShowModal(true);
     setEditingId(null);
     setFormData({ nama: '', kategori: '', stok: '', harga: '', satuan: '', minimal: '' });
   };
+
+  const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
 
   return (
     <div className={`min-h-screen p-4 sm:p-6 transition-colors duration-200
@@ -142,7 +141,7 @@ export default function StokUMKM() {
 
       {/* Mobile floating add button */}
       <button
-        onClick={handleTambahBarang}
+        onClick={openModal}
         className="sm:hidden fixed bottom-5 right-5 bg-gray-900 hover:bg-black text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl z-50"
       >
         <Plus size={28} />
@@ -217,7 +216,7 @@ export default function StokUMKM() {
           </div>
 
           <button
-            onClick={handleTambahBarang}
+            onClick={showModal}
             className="hidden sm:flex bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg"
           >
             <Plus size={20} />
@@ -406,6 +405,10 @@ export default function StokUMKM() {
         {showModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className={`w-full max-w-md rounded-xl border-2 p-6 shadow-2xl transition-all ${isDark ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-gray-300 text-gray-900'}`}>
+              <button onClick={closeModal}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors">
+                <X size={24} />
+              </button>
               <h2 className="text-2xl font-bold mb-6">{editingId ? 'Edit Barang' : 'Tambah Barang Baru'}</h2>
 
               <div className="space-y-4">
@@ -480,7 +483,7 @@ export default function StokUMKM() {
 
                 <div className="flex gap-3 mt-6">
                   <button onClick={handleSubmit} className="flex-1 bg-gray-900 hover:bg-black text-white py-2 rounded-lg font-semibold transition-all">{editingId ? 'Update' : 'Simpan'}</button>
-                  <button onClick={() => setShowModal(false)} className={`flex-1 py-2 rounded-lg font-semibold transition-all ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-300 text-gray-800 hover:bg-gray-400'}`}>Batal</button>
+                  <button onClick={closeModal} className={`flex-1 py-2 rounded-lg font-semibold transition-all ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-300 text-gray-800 hover:bg-gray-400'}`}>Batal</button>
                 </div>
 
               </div>
