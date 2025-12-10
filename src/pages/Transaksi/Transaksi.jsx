@@ -1,52 +1,68 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Search, TrendingUp, TrendingDown, DollarSign, Calendar, ChevronLeft, ChevronRight, ShoppingCart, Package, X, XIcon } from 'lucide-react';
+import {
+  Plus, Search, TrendingUp, TrendingDown, Calendar,
+  ChevronLeft, ChevronRight, XIcon
+} from 'lucide-react';
 import { useTheme } from "../../contexts/ThemeContext";
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogOverlay, DialogTitle } from '@radix-ui/react-dialog';
+import {
+  Dialog, DialogClose, DialogContent,
+  DialogDescription, DialogOverlay, DialogTitle
+} from '@radix-ui/react-dialog';
 import { DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { LIST_TRX } from '@/constants/api/transaction';
+import { apiGet } from '@/lib/api';
 
 export default function TransaksiUMKM() {
   const { darkMode: isDark } = useTheme();
 
-  const [data, setData] = useState([
-    { id: 1, tanggal: '2024-01-15', jenis: 'Masuk', barang: 'Kemeja Batik', jumlah: 50, harga: 150000, total: 7500000, keterangan: 'Restock dari supplier' },
-    { id: 2, tanggal: '2024-01-16', jenis: 'Keluar', barang: 'Keripik Singkong', jumlah: 30, harga: 15000, total: 450000, keterangan: 'Penjualan retail' },
-    { id: 3, tanggal: '2024-01-16', jenis: 'Keluar', barang: 'Tas Anyaman', jumlah: 5, harga: 85000, total: 425000, keterangan: 'Penjualan online' },
-    { id: 4, tanggal: '2024-01-17', jenis: 'Masuk', barang: 'Kopi Arabika', jumlah: 100, harga: 45000, total: 4500000, keterangan: 'Pembelian stok baru' },
-    { id: 5, tanggal: '2024-01-18', jenis: 'Keluar', barang: 'Sarung Tenun', jumlah: 3, harga: 200000, total: 600000, keterangan: 'Penjualan ke toko' },
-  ]);
-
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterJenis, setFilterJenis] = useState('Semua');
   const [showModal, setShowModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
   const [formData, setFormData] = useState({
     tanggal: '', jenis: 'Masuk', barang: '', jumlah: '', harga: '', keterangan: ''
   });
-  cosnt [loading, setLoading] = useState(true); 
 
   const [selected, setSelected] = useState(null);
 
   async function loadData() {
     setLoading(true);
-    const res = await apiGet(LIST_TRX);
 
-    if (res.error) {
+    const res = await apiGet(
+      `${LIST_TRX}?page=${currentPage}&limit=${itemsPerPage}`
+    );
+
+    if (res?.error) {
       setError(res.message || "Gagal memuat data transaksi");
       setLoading(false);
       return;
     }
 
-    setData(res?.data?.data || []); // pastikan format sesuai API-mu
+    const mapped = (res?.data?.data?.data || []).map((trx) => ({
+      id: trx.id_transaction,
+      tanggal: trx.createdAt,
+      jenis: trx.type === "buy" ? "Masuk" : "Keluar",
+      barang: "-",
+      jumlah: 0,
+      harga: 0,
+      total: trx.total_price,
+      keterangan: trx.description || "-"
+    }));
+
+    setData(mapped);
     setLoading(false);
   }
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [currentPage]);
 
   const getStats = () => {
     const masuk = data.filter(t => t.jenis === 'Masuk');
@@ -56,11 +72,13 @@ export default function TransaksiUMKM() {
       jumlahKeluar: keluar.length,
       totalMasuk: masuk.reduce((s, t) => s + t.total, 0),
       totalKeluar: keluar.reduce((s, t) => s + t.total, 0),
-      profit: keluar.reduce((s, t) => s + t.total, 0) - masuk.reduce((s, t) => s + t.total, 0)
+      profit: keluar.reduce((s, t) => s + t.total, 0) -
+        masuk.reduce((s, t) => s + t.total, 0)
     };
   };
 
   const stats = getStats();
+
   const filteredTransaksi = data.filter(t =>
     (t.barang.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.keterangan.toLowerCase().includes(searchTerm.toLowerCase())) &&
@@ -77,39 +95,23 @@ export default function TransaksiUMKM() {
     setCurrentPage(pageNumber);
   };
 
-  const handleSubmit = () => {
-    if (!formData.tanggal || !formData.barang || !formData.jumlah || !formData.harga) {
-      alert('Mohon lengkapi semua field yang wajib diisi');
-      return;
-    }
-    const newItem = {
-      ...formData, id: Date.now(),
-      total: parseInt(formData.jumlah) * parseInt(formData.harga),
-      jumlah: parseInt(formData.jumlah), harga: parseInt(formData.harga)
-    };
-    setData([...data, newItem]);
-    closeModal();
-  };
+  const formatRupiah = (n) =>
+    new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0
+    }).format(n);
 
-  const closeModal = () => {
-    setShowModal(false);
-    setFormData({ tanggal: '', jenis: 'Masuk', barang: '', jumlah: '', harga: '', keterangan: '' });
-  };
-
-  const openModal = () => {
-    setShowModal(true);
-    const today = new Date().toISOString().split('T')[0];
-    setFormData({
-      tanggal: today,
-      jenis: 'Masuk',
-      barang: '',
-      jumlah: '',
-      harga: '',
-      keterangan: ''
+  const formatTanggal = (t) =>
+    new Date(t).toLocaleDateString('id-ID', {
+      day: 'numeric', month: 'long', year: 'numeric'
     });
+
+  const handleTambahTransaksi = () => {
+    setShowModal(true);
+    setEditingId(null);
   };
-  const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
-  const formatTanggal = (t) => new Date(t).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
 
   // helper class yg bakal ke pake
   const bg = isDark ? 'bg-slate-900' : 'bg-white';
@@ -128,7 +130,7 @@ export default function TransaksiUMKM() {
 
         {/* Mobile floating add button */}
         <button
-          onClick={openModal}
+          onClick={handleTambahTransaksi}
           className={`sm:hidden fixed bottom-5 right-5 bg-gray-900 hover:bg-black text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl z-50
                   ${isDark
               ? 'bg-gray-800 text-white hover:bg-white hover:text-black'
@@ -211,7 +213,7 @@ export default function TransaksiUMKM() {
 
 
           <button
-            onClick={openModal}
+            onClick={handleTambahTransaksi}
             className={`hidden sm:flex px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg ${isDark
               ? "bg-gray-800 text-white hover:bg-white hover:text-black"
               : "bg-black text-white hover:bg-gray-900"
@@ -263,7 +265,7 @@ export default function TransaksiUMKM() {
                     </td>
 
                     <td className="px-4 sm:px-6 py-4 text-right font-medium">
-                      <Button variant="outline" onClick={() => setSelected(trx)}>
+                      <Button variant="outline" onClick={() => setSelected(item)}>
                         Detail
                       </Button>
                     </td>
@@ -513,7 +515,7 @@ export default function TransaksiUMKM() {
                 {/* Buttons */}
                 <div className="flex gap-3 mt-6">
                   <button
-                    onClick={handleSubmit}
+                    // onClick={handleSubmit}
                     className={`
                       flex-1 py-2 rounded-lg font-semibold transition-all
                       ${isDark
