@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
-import { Plus, Search, TrendingUp, TrendingDown, DollarSign, Calendar, ChevronLeft, ChevronRight, ShoppingCart, Package, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Plus, Search, TrendingUp, TrendingDown, DollarSign, Calendar, ChevronLeft, ChevronRight, ShoppingCart, Package, X, XIcon } from 'lucide-react';
 import { useTheme } from "../../contexts/ThemeContext";
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogOverlay, DialogTitle } from '@radix-ui/react-dialog';
+import { DialogFooter, DialogHeader } from '@/components/ui/dialog';
+import { LIST_TRX } from '@/constants/api/transaction';
 
 export default function TransaksiUMKM() {
   const { darkMode: isDark } = useTheme();
 
-  const [transaksiList, setTransaksiList] = useState([
+  const [data, setData] = useState([
     { id: 1, tanggal: '2024-01-15', jenis: 'Masuk', barang: 'Kemeja Batik', jumlah: 50, harga: 150000, total: 7500000, keterangan: 'Restock dari supplier' },
     { id: 2, tanggal: '2024-01-16', jenis: 'Keluar', barang: 'Keripik Singkong', jumlah: 30, harga: 15000, total: 450000, keterangan: 'Penjualan retail' },
     { id: 3, tanggal: '2024-01-16', jenis: 'Keluar', barang: 'Tas Anyaman', jumlah: 5, harga: 85000, total: 425000, keterangan: 'Penjualan online' },
     { id: 4, tanggal: '2024-01-17', jenis: 'Masuk', barang: 'Kopi Arabika', jumlah: 100, harga: 45000, total: 4500000, keterangan: 'Pembelian stok baru' },
     { id: 5, tanggal: '2024-01-18', jenis: 'Keluar', barang: 'Sarung Tenun', jumlah: 3, harga: 200000, total: 600000, keterangan: 'Penjualan ke toko' },
   ]);
+
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterJenis, setFilterJenis] = useState('Semua');
@@ -22,9 +27,29 @@ export default function TransaksiUMKM() {
     tanggal: '', jenis: 'Masuk', barang: '', jumlah: '', harga: '', keterangan: ''
   });
 
+  const [selected, setSelected] = useState(null);
+
+  async function loadData() {
+    setLoading(true);
+    const res = await apiGet(LIST_TRX);
+
+    if (res.error) {
+      setError(res.message || "Gagal memuat data transaksi");
+      setLoading(false);
+      return;
+    }
+
+    setData(res?.data?.data || []); // pastikan format sesuai API-mu
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
   const getStats = () => {
-    const masuk = transaksiList.filter(t => t.jenis === 'Masuk');
-    const keluar = transaksiList.filter(t => t.jenis === 'Keluar');
+    const masuk = data.filter(t => t.jenis === 'Masuk');
+    const keluar = data.filter(t => t.jenis === 'Keluar');
     return {
       jumlahMasuk: masuk.length,
       jumlahKeluar: keluar.length,
@@ -35,9 +60,9 @@ export default function TransaksiUMKM() {
   };
 
   const stats = getStats();
-  const filteredTransaksi  = transaksiList.filter(t => 
-    (t.barang.toLowerCase().includes(searchTerm.toLowerCase()) || 
-     t.keterangan.toLowerCase().includes(searchTerm.toLowerCase())) &&
+  const filteredTransaksi = data.filter(t =>
+    (t.barang.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.keterangan.toLowerCase().includes(searchTerm.toLowerCase())) &&
     (filterJenis === 'Semua' || t.jenis === filterJenis)
   );
 
@@ -61,7 +86,7 @@ export default function TransaksiUMKM() {
       total: parseInt(formData.jumlah) * parseInt(formData.harga),
       jumlah: parseInt(formData.jumlah), harga: parseInt(formData.harga)
     };
-    setTransaksiList([...transaksiList, newItem]);
+    setData([...data, newItem]);
     closeModal();
   };
 
@@ -105,9 +130,9 @@ export default function TransaksiUMKM() {
           onClick={openModal}
           className={`sm:hidden fixed bottom-5 right-5 bg-gray-900 hover:bg-black text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl z-50
                   ${isDark
-                  ? 'bg-gray-800 text-white hover:bg-white hover:text-black'
-                  : 'bg-black text-white hover:bg-gray-900'
-                  }`}
+              ? 'bg-gray-800 text-white hover:bg-white hover:text-black'
+              : 'bg-black text-white hover:bg-gray-900'
+            }`}
         >
           <Plus size={28} />
         </button>
@@ -154,9 +179,9 @@ export default function TransaksiUMKM() {
 
           {/* SEARCH */}
           <div className="flex-1 relative">
-            <Search 
-              className={`absolute left-4 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400' : 'text-gray-400'}`} 
-              size={20} 
+            <Search
+              className={`absolute left-4 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400' : 'text-gray-400'}`}
+              size={20}
             />
             <input
               type="text"
@@ -186,10 +211,10 @@ export default function TransaksiUMKM() {
 
           <button
             onClick={openModal}
-            className={`hidden sm:flex px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg ${isDark 
-              ? "bg-gray-800 text-white hover:bg-white hover:text-black" 
+            className={`hidden sm:flex px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg ${isDark
+              ? "bg-gray-800 text-white hover:bg-white hover:text-black"
               : "bg-black text-white hover:bg-gray-900"
-            }`}
+              }`}
           >
             <Plus size={20} />
             <span className="hidden sm:inline">Tambah Transaksi</span>
@@ -205,10 +230,8 @@ export default function TransaksiUMKM() {
                 <tr>
                   <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold">Tanggal</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold">Jenis Transaksi</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold">Barang</th>
-                  <th className="px-4 sm:px-6 py-3 text-center text-sm font-semibold">Jumlah</th>
-                  <th className="px-4 sm:px-6 py-3 text-right text-sm font-semibold">Harga Satuan</th>
                   <th className="px-4 sm:px-6 py-3 text-right text-sm font-semibold">Total</th>
+                  <th className="px-4 sm:px-6 py-3 text-right text-sm font-semibold">Aksi</th>
                 </tr>
               </thead>
 
@@ -234,23 +257,14 @@ export default function TransaksiUMKM() {
                       )}
                     </td>
 
-                    <td className="px-4 sm:px-6 py-4">
-                      <div className={`font-medium ${text}`}>{item.barang}</div>
-                      {item.keterangan && (
-                        <div className={`${subText} text-sm`}>{item.keterangan}</div>
-                      )}
-                    </td>
-
-                    <td className="px-4 sm:px-6 py-4 text-center">
-                      <span className={`text-lg font-semibold ${text}`}>{item.jumlah}</span>
+                    <td className="px-4 sm:px-6 py-4 text-right">
+                      <span className={`text-lg font-bold ${text}`}>{formatRupiah(item.total)}</span>
                     </td>
 
                     <td className="px-4 sm:px-6 py-4 text-right font-medium">
-                      <span className={`${text}`}>{formatRupiah(item.harga)}</span>
-                    </td>
-
-                    <td className="px-4 sm:px-6 py-4 text-right">
-                      <span className={`text-lg font-bold ${text}`}>{formatRupiah(item.total)}</span>
+                      <Button variant="outline" onClick={() => setSelected(trx)}>
+                        Detail
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -274,57 +288,48 @@ export default function TransaksiUMKM() {
             </div>
           )}
 
-        {/* MOBILE LIST VIEW */}
-        <div className="md:hidden space-y-4 mt-4">
-          {currentItems.map((item) => (
-            <div
-              key={item.id}
-              className={`rounded-xl p-4 border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-300'}`}
-            >
-              <div className="flex justify-between items-start">
-                <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                  {formatTanggal(item.tanggal)}
-                </p>
-
-                <span
-                  className={`px-2 py-1 text-xs rounded-md font-semibold flex items-center gap-1 
-                  ${item.jenis === 'Masuk'
-                    ? (isDark ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-700')
-                    : (isDark ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-700')
-                  }`}
-                >
-                  {item.jenis === 'Masuk' ? (
-                    <TrendingDown size={14} />
-                  ) : (
-                    <TrendingUp size={14} />
-                  )}
-                  {item.jenis}
-                </span>
-              </div>
-                
-              <p className={`text-lg font-semibold mt-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
-                {item.barang}
-              </p>
-
-              {item.keterangan && (
-                <p className={`text-sm mt-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                  {item.keterangan}
-                </p>
-              )}
-
-              <div className="flex justify-between items-end mt-3">
-                <div className="text-right ml-auto">
-                  <p className={`text-xl font-bold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-                    {formatRupiah(item.total)}
-                  </p>
+          {/* MOBILE LIST VIEW */}
+          <div className="md:hidden space-y-4 mt-4">
+            {currentItems.map((item) => (
+              <div
+                key={item.id}
+                className={`rounded-xl p-4 border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-300'}`}
+              >
+                <div className="flex justify-between items-start">
                   <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    {formatRupiah(item.harga)} × {item.jumlah}
+                    {formatTanggal(item.tanggal)}
                   </p>
+
+                  <span
+                    className={`px-2 py-1 text-xs rounded-md font-semibold flex items-center gap-1 
+                  ${item.jenis === 'Masuk'
+                        ? (isDark ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-700')
+                        : (isDark ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-700')
+                      }`}
+                  >
+                    {item.jenis === 'Masuk' ? (
+                      <TrendingDown size={14} />
+                    ) : (
+                      <TrendingUp size={14} />
+                    )}
+                    {item.jenis}
+                  </span>
+                </div>
+
+
+                <div className="flex justify-between items-end mt-3">
+                  <div className="text-right ml-auto">
+                    <p className={`text-xl font-bold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+                      {formatRupiah(item.total)}
+                    </p>
+                    <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                      {formatRupiah(item.harga)} × {item.jumlah}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
         </div>
 
@@ -373,16 +378,15 @@ export default function TransaksiUMKM() {
         {showModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div
-              className={`w-full mx-2 sm:mx-0 max-w-md rounded-xl border-2 p-6 shadow-2xl transition-all ${
-                isDark
-                  ? "bg-gray-800 border-gray-700 text-gray-100"
-                  : "bg-white border-gray-300 text-gray-900"
-              }`}
+              className={`w-full mx-2 sm:mx-0 max-w-md rounded-xl border-2 p-6 shadow-2xl transition-all ${isDark
+                ? "bg-gray-800 border-gray-700 text-gray-100"
+                : "bg-white border-gray-300 text-gray-900"
+                }`}
             >
               <h2 className="text-2xl font-bold mb-6">
                 Tambah Transaksi Baru
               </h2>
-            
+
               <div className="space-y-4">
                 {/* Tanggal */}
                 <div>
@@ -393,14 +397,13 @@ export default function TransaksiUMKM() {
                     type="date"
                     value={formData.tanggal}
                     onChange={(e) => setFormData({ ...formData, tanggal: e.target.value })}
-                    className={`w-full rounded-lg px-4 py-2 transition-all ${
-                      isDark
-                        ? "bg-gray-700 border border-gray-600 text-gray-100"
-                        : "bg-white border-2 border-gray-300 text-gray-800"
-                    }`}
+                    className={`w-full rounded-lg px-4 py-2 transition-all ${isDark
+                      ? "bg-gray-700 border border-gray-600 text-gray-100"
+                      : "bg-white border-2 border-gray-300 text-gray-800"
+                      }`}
                   />
                 </div>
-                  
+
                 {/* Jenis Transaksi */}
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-200" : "text-gray-700"}`}>
@@ -409,17 +412,16 @@ export default function TransaksiUMKM() {
                   <select
                     value={formData.jenis}
                     onChange={(e) => setFormData({ ...formData, jenis: e.target.value })}
-                    className={`w-full rounded-lg px-4 py-2 transition-all ${
-                      isDark
-                        ? "bg-gray-700 border border-gray-600 text-gray-100"
-                        : "bg-white border-2 border-gray-300 text-gray-800"
-                    }`}
+                    className={`w-full rounded-lg px-4 py-2 transition-all ${isDark
+                      ? "bg-gray-700 border border-gray-600 text-gray-100"
+                      : "bg-white border-2 border-gray-300 text-gray-800"
+                      }`}
                   >
                     <option value="Masuk">Transaksi Masuk (Pembelian)</option>
                     <option value="Keluar">Transaksi Keluar (Penjualan)</option>
                   </select>
                 </div>
-                  
+
                 {/* Nama Barang */}
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-200" : "text-gray-700"}`}>
@@ -429,15 +431,14 @@ export default function TransaksiUMKM() {
                     type="text"
                     value={formData.barang}
                     onChange={(e) => setFormData({ ...formData, barang: e.target.value })}
-                    className={`w-full rounded-lg px-4 py-2 transition-all ${
-                      isDark
-                        ? "bg-gray-700 border border-gray-600 text-gray-100"
-                        : "bg-white border-2 border-gray-300 text-gray-800"
-                    }`}
+                    className={`w-full rounded-lg px-4 py-2 transition-all ${isDark
+                      ? "bg-gray-700 border border-gray-600 text-gray-100"
+                      : "bg-white border-2 border-gray-300 text-gray-800"
+                      }`}
                     placeholder="Contoh: Kemeja Batik"
                   />
                 </div>
-                  
+
                 {/* Jumlah & Harga */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -451,16 +452,15 @@ export default function TransaksiUMKM() {
                         const value = e.target.value;
                         setFormData({ ...formData, jumlah: value === "" ? "" : parseInt(value) });
                       }}
-                      className={`w-full rounded-lg px-4 py-2 transition-all ${
-                        isDark
-                          ? "bg-gray-700 border border-gray-600 text-gray-100"
-                          : "bg-white border-2 border-gray-300 text-gray-800"
-                      }`}
+                      className={`w-full rounded-lg px-4 py-2 transition-all ${isDark
+                        ? "bg-gray-700 border border-gray-600 text-gray-100"
+                        : "bg-white border-2 border-gray-300 text-gray-800"
+                        }`}
                       placeholder="0"
                       min="1"
                     />
                   </div>
-                    
+
                   <div>
                     <label className={`block text-sm font-medium mb-2 ${isDark ? "text-gray-200" : "text-gray-700"}`}>
                       Harga Satuan
@@ -472,17 +472,16 @@ export default function TransaksiUMKM() {
                         const value = e.target.value;
                         setFormData({ ...formData, harga: value === "" ? "" : parseInt(value) });
                       }}
-                      className={`w-full rounded-lg px-4 py-2 transition-all ${
-                        isDark
-                          ? "bg-gray-700 border border-gray-600 text-gray-100"
-                          : "bg-white border-2 border-gray-300 text-gray-800"
-                      }`}
+                      className={`w-full rounded-lg px-4 py-2 transition-all ${isDark
+                        ? "bg-gray-700 border border-gray-600 text-gray-100"
+                        : "bg-white border-2 border-gray-300 text-gray-800"
+                        }`}
                       placeholder="0"
                       min="0"
                     />
                   </div>
                 </div>
-                    
+
                 {/* Total */}
                 {formData.jumlah && formData.harga && (
                   <div className={`rounded-lg p-3 ${isDark ? "bg-gray-700" : "bg-gray-100"}`}>
@@ -501,31 +500,30 @@ export default function TransaksiUMKM() {
                   <textarea
                     value={formData.keterangan}
                     onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
-                    className={`w-full rounded-lg px-4 py-2 transition-all ${
-                      isDark
-                        ? "bg-gray-700 border border-gray-600 text-gray-100"
-                        : "bg-white border-2 border-gray-300 text-gray-800"
-                    }`}
+                    className={`w-full rounded-lg px-4 py-2 transition-all ${isDark
+                      ? "bg-gray-700 border border-gray-600 text-gray-100"
+                      : "bg-white border-2 border-gray-300 text-gray-800"
+                      }`}
                     placeholder="Catatan transaksi..."
                     rows="3"
                   />
                 </div>
-                  
+
                 {/* Buttons */}
                 <div className="flex gap-3 mt-6">
                   <button
                     onClick={handleSubmit}
-                      className={`
+                    className={`
                       flex-1 py-2 rounded-lg font-semibold transition-all
-                      ${isDark 
-                        ? "bg-white text-black hover:bg-gray-900 hover:text-white"  
-                        : "bg-gray-900 text-white hover:bg-black"   
+                      ${isDark
+                        ? "bg-white text-black hover:bg-gray-900 hover:text-white"
+                        : "bg-gray-900 text-white hover:bg-black"
                       }
                     `}
                   >
                     Simpan
                   </button>
-                    
+
                   <button
                     onClick={() => setShowModal(false)}
                     className={`flex-1 py-2 rounded-lg font-semibold transition-all ${isDark ? "bg-gray-700 text-white hover:bg-gray-600" : "bg-gray-300 text-gray-800 hover:bg-gray-400"}`}
@@ -538,44 +536,95 @@ export default function TransaksiUMKM() {
           </div>
         )}
 
+        <Dialog
+          open={!!selected}
+          onOpenChange={(open) => !open && setSelected(null)}
+        >
+          <DialogOverlay className="bg-black/50 backdrop-blur-sm" />
+          <DialogContent className="sm:max-w-[520px]" showCloseButton={false}>
+            <DialogHeader>
+              <DialogTitle>Detail Transaksi</DialogTitle>
+              <DialogDescription>
+                Rincian pembelian {selected?.id_transaction}
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogClose asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="absolute top-4 right-4 shadow-none"
+              >
+                <XIcon />
+              </Button>
+            </DialogClose>
+
+            {selected && (
+              <div className="space-y-3">
+                {selected.items?.map((item) => (
+                  <div key={item.id_trx_item} className="flex justify-between text-sm">
+                    <span>
+                      {item.product?.name} x {item.amount}
+                    </span>
+                    <span>
+                      Rp {item.price?.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                ))}
+
+                <div className="border-t pt-2 text-sm font-semibold flex justify-between">
+                  <span>Total</span>
+                  <span>Rp {selected.total_price?.toLocaleString("id-ID")}</span>
+                </div>
+
+                <DialogFooter>
+                  <div className="flex justify-between mt-4 sticky bottom-0 bg-background py-2 border-t">
+                    <Button variant="outline" onClick={() => setSelected(null)}>
+                      Tutup
+                    </Button>
+                  </div>
+                </DialogFooter>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
         {/* Pagination khusus mobile */}
         {filteredTransaksi.length > itemsPerPage && (
           <div className="md:hidden flex flex-col items-center mt-6 pb-6">
-          
+
             {/* paginate btn div */}
             <div className="flex items-center gap-3">
-        
+
               {/* preview */}
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`p-2 rounded-full transition-all ${
-                  currentPage === 1
-                    ? 'bg-gray-300 text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-800 text-white'
-                }`}
+                className={`p-2 rounded-full transition-all ${currentPage === 1
+                  ? 'bg-gray-300 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-800 text-white'
+                  }`}
               >
                 <ChevronLeft size={18} />
               </button>
-              
+
               {/* page sekarang */}
               <span className={`${isDark ? 'text-white' : 'text-gray-800'} font-semibold`}>
                 {currentPage} / {totalPages}
               </span>
-              
+
               {/* button Next */}
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className={`p-2 rounded-full transition-all ${
-                  currentPage === totalPages
-                    ? 'bg-gray-300 text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-800 text-white'
-                }`}
+                className={`p-2 rounded-full transition-all ${currentPage === totalPages
+                  ? 'bg-gray-300 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-800 text-white'
+                  }`}
               >
                 <ChevronRight size={18} />
               </button>
-              
+
             </div>
           </div>
         )}
