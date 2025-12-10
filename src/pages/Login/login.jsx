@@ -46,22 +46,21 @@ export default function LoginPage() {
         return;
       }
 
+      if (response.status == 400) {
+        setErrorMessage("Username atau Password salah.");
+        setLoading(false);
+        return;
+      }
+
       setShowPopup(false);
       window.history.replaceState({}, "");
 
       refetchAuthStatus();
       navigate("/dashboard");
-
     } catch (error) {
       console.error("Error:", error);
       setErrorMessage("Terjadi kesalahan server. Coba lagi nanti.");
 
-      setLoading(false);
-      return;
-    }
-
-    if (response.status == 400) {
-      setErrorMessage("Username atau Password salah.");
       setLoading(false);
       return;
     }
@@ -81,11 +80,10 @@ export default function LoginPage() {
   return (
     <div
       className={`
-        min-h-screen flex flex-col md:flex-row 
+        min-h-screen flex flex-col md:flex-row
         ${darkMode ? "bg-black text-white" : "bg-white text-black"}
       `}
     >
-
       {/* Popup protected route */}
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
@@ -156,7 +154,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className={`
-                    absolute right-3 top-2.5 
+                    absolute right-3 top-2.5
                     ${darkMode ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-black"}
                   `}
                 >
@@ -174,11 +172,12 @@ export default function LoginPage() {
               disabled={loading}
               className={`
                 block w-full text-center py-2 rounded-lg transition-all
-                ${loading
-                  ? "bg-gray-400 cursor-not-allowed text-white"
-                  : darkMode
-                    ? "bg-white text-black"
-                    : "bg-black text-white"
+                ${
+                  loading
+                    ? "bg-gray-400 cursor-not-allowed text-white"
+                    : darkMode
+                      ? "bg-white text-black"
+                      : "bg-black text-white"
                 }
               `}
             >
