@@ -37,10 +37,25 @@ export default function LoginPage() {
     setLoading(true);
     setErrorMessage("");
 
-    const response = await apiPost("/auth/login", { username, password });
+    try {
+      const response = await apiPost("/auth/login", { username, password });
 
-    if (response.status >= 500) {
-      setErrorMessage("Terjadi kesalahan pada server. Coba lagi nanti");
+      if (response.status >= 500) {
+        setErrorMessage("Username atau Password salah.");
+        setLoading(false);
+        return;
+      }
+
+      setShowPopup(false);
+      window.history.replaceState({}, "");
+
+      refetchAuthStatus();
+      navigate("/dashboard");
+
+    } catch (error) {
+      console.error("Error:", error);
+      setErrorMessage("Terjadi kesalahan server. Coba lagi nanti.");
+
       setLoading(false);
       return;
     }
@@ -70,6 +85,7 @@ export default function LoginPage() {
         ${darkMode ? "bg-black text-white" : "bg-white text-black"}
       `}
     >
+
       {/* Popup protected route */}
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
