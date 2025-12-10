@@ -366,7 +366,7 @@ export default function StokUMKM() {
           </div>
 
           <button
-            onClick={openModal}
+            onClick={handleTambahBarang}
              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all
               ${isDark
                 ? 'bg-gray-800 text-white hover:bg-white hover:text-black'

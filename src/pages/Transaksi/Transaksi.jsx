@@ -26,6 +26,7 @@ export default function TransaksiUMKM() {
   const [formData, setFormData] = useState({
     tanggal: '', jenis: 'Masuk', barang: '', jumlah: '', harga: '', keterangan: ''
   });
+  cosnt [loading, setLoading] = useState(true); 
 
   const [selected, setSelected] = useState(null);
 
